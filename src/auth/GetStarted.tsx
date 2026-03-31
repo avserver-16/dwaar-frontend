@@ -1,50 +1,129 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import {
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    ActivityIndicator,
+    TouchableWithoutFeedback,
+    Keyboard,
+} from "react-native";
 import GradientBackground from "../../styles/Background";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
 
+
 type NavigationProp = NativeStackNavigationProp<
-  AuthStackParamList,
-  "GetStarted"
+    AuthStackParamList,
+    "GetStarted"
 >;
+
+// Replace with your actual API call
+const checkPhoneExists = async (phone: string): Promise<boolean> => {
+    try {
+        const response = await fetch("https://your-api.com/auth/check-phone", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: `+91${phone}` }),
+        });
+        const data = await response.json();
+        return data.exists; // expects { exists: true | false }
+    } catch (error) {
+        console.error("Phone check failed:", error);
+        throw error;
+    }
+};
 
 const GetStarted = () => {
     const navigation = useNavigation<NavigationProp>();
+    const [phone, setPhone] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const isValid = phone.length === 10;
+
+    const handleNext = async () => {
+        if (!isValid) return;
+        setError("");
+        setLoading(true);
+        try {
+            const exists = await checkPhoneExists(phone);
+            if (exists) {
+                navigation.navigate("Login", { phone });
+            } else {
+                navigation.navigate("Register", { phone });
+            }
+        } catch {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <GradientBackground>
-            <View style={styles.container}>
-                <View style={styles.logoContainer}>
-                    <Text style={styles.logoText}>Dwaar</Text>
-                </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 
-                <View style={styles.inputWrapper}>
-                    <View style={styles.countryCode}>
-                        <Text style={styles.countryCodeText}>+91</Text>
+            <GradientBackground>
+                <View style={styles.container}>
+                    <View style={styles.logoContainer}>
+                        <Text style={styles.logoText}>Dwaar</Text>
                     </View>
-                    <TextInput
-                        placeholder="Enter your number"
-                        style={styles.input}
-                        keyboardType="numeric"
-                        placeholderTextColor="#9AB17A"
-                    />
-                </View>
 
-                <View style={styles.footer}>
-                    <Text style={styles.termsText}>
-                        Please carefully read the Terms & Policy
-                    </Text>
+                    <View style={styles.inputWrapper}>
+                        <View style={styles.countryCode}>
+                            <Text style={styles.countryCodeText}>+91</Text>
+                        </View>
+                        <TextInput
+                            placeholder="Enter your number"
+                            style={[styles.input, error ? styles.inputError : null]}
+                            keyboardType="numeric"
+                            placeholderTextColor="#9AB17A"
+                            maxLength={10}
+                            value={phone}
+                            onChangeText={(text) => {
+                                setError("");
+                                setPhone(text.replace(/[^0-9]/g, ""));
+                            }}
+                        />
+                        {/* Character counter */}
+                        {phone.length > 0 && (
+                            <Text style={styles.counter}>{phone.length}/10</Text>
+                        )}
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.nextButton}
-                        onPress={() => navigation.navigate("Register")}
-                    >
-                        <Text style={styles.nextButtonText}>Next</Text>
-                    </TouchableOpacity>
+                    {/* Error message */}
+                    {error ? (
+                        <View style={styles.errorWrapper}>
+                            <Text style={styles.errorText}>{error}</Text>
+                        </View>
+                    ) : null}
+
+                    <View style={styles.footer}>
+                        <Text style={styles.termsText}>
+                            Please carefully read the Terms & Policy
+                        </Text>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.nextButton,
+                                (!isValid || loading) && styles.nextButtonDisabled,
+                            ]}
+                            onPress={handleNext}
+                            disabled={!isValid || loading}
+                            activeOpacity={0.85}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#000" size="small" />
+                            ) : (
+                                <Text style={styles.nextButtonText}>Next</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-        </GradientBackground>
+            </GradientBackground>
+        </TouchableWithoutFeedback>
     );
 };
 
@@ -90,6 +169,26 @@ const styles = StyleSheet.create({
         paddingLeft: 80,
         borderColor: "#9AB17A",
     },
+    inputError: {
+        borderColor: "#e06c6c",
+    },
+    counter: {
+        position: "absolute",
+        right: 20,
+        top: 18,
+        fontSize: 13,
+        color: "#9AB17A99",
+    },
+    errorWrapper: {
+        position: "absolute",
+        bottom: 290,
+        width: "100%",
+        alignItems: "center",
+    },
+    errorText: {
+        fontSize: 13,
+        color: "#e06c6c",
+    },
     footer: {
         position: "absolute",
         bottom: 24,
@@ -108,6 +207,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         backgroundColor: "#C3CC9B",
         borderRadius: 100,
+    },
+    nextButtonDisabled: {
+        opacity: 0.45,
     },
     nextButtonText: {
         fontSize: 16,
