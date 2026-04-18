@@ -16,9 +16,11 @@ import GradientBackground from "../../styles/Background";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
+import type { RootStackParamList } from "../../navigation/types";
 
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList, "Login">;
+type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ROLES = [
     { id: "resident", label: "🏠 Resident", sub: "Homeowner / Tenant" },
@@ -28,6 +30,7 @@ const ROLES = [
 
 const Login = () => {
     const navigation = useNavigation<NavigationProp>();
+    const rootNavigation = navigation.getParent<RootNavigationProp>();
     const route = useRoute<RouteProp<AuthStackParamList, "Login">>();
     const { phone } = route.params;
 
@@ -158,6 +161,12 @@ const Login = () => {
                                 ]}
                                 activeOpacity={0.85}
                                 disabled={!email || !password || !selectedRole}
+                                onPress={() =>
+                                    rootNavigation?.reset({
+                                        index: 0,
+                                        routes: [{ name: "Main" }],
+                                    })
+                                }
                             >
                                 <Text style={styles.loginButtonText}>Sign In</Text>
                             </TouchableOpacity>

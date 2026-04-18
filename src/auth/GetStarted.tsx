@@ -13,6 +13,7 @@ import GradientBackground from "../../styles/Background";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
+import MainTabNavigator from "../app/tabs/MainTabNavigator";
 
 
 type NavigationProp = NativeStackNavigationProp<
@@ -20,21 +21,22 @@ type NavigationProp = NativeStackNavigationProp<
     "GetStarted"
 >;
 
-// Replace with your actual API call
-const checkPhoneExists = async (phone: string): Promise<boolean> => {
-    try {
-        const response = await fetch("https://your-api.com/auth/check-phone", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone: `+91${phone}` }),
-        });
-        const data = await response.json();
-        return data.exists; // expects { exists: true | false }
-    } catch (error) {
-        console.error("Phone check failed:", error);
-        throw error;
-    }
-};
+
+// const checkPhoneExists = async (phone: string): Promise<boolean> => {
+//     return true
+//     try {
+//         const response = await fetch("https://your-api.com/auth/check-phone", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({ phone: `+91${phone}` }),
+//         });
+//         const data = await response.json();
+//         return data.exists; // expects { exists: true | false }
+//     } catch (error) {
+//         console.error("Phone check failed:", error);
+//         throw error;
+//     }
+// };
 
 const GetStarted = () => {
     const navigation = useNavigation<NavigationProp>();
@@ -45,21 +47,23 @@ const GetStarted = () => {
     const isValid = phone.length === 10;
 
     const handleNext = async () => {
-        if (!isValid) return;
-        setError("");
-        setLoading(true);
-        try {
-            const exists = await checkPhoneExists(phone);
-            if (exists) {
-                navigation.navigate("Login", { phone });
-            } else {
-                navigation.navigate("Register", { phone });
-            }
-        } catch {
-            setError("Something went wrong. Please try again.");
-        } finally {
-            setLoading(false);
-        }
+        navigation.navigate("MainTabNavigator");
+        // if (!isValid) return;
+        // setError("");
+        // setLoading(true);
+      
+        // try {
+        //     const exists = await checkPhoneExists(phone);
+        //     if (exists) {
+        //         navigation.navigate("Login", { phone });
+        //     } else {
+        //         navigation.navigate("Register", { phone });
+        //     }
+        // } catch {
+        //     setError("Something went wrong. Please try again.");
+        // } finally {
+        //     setLoading(false);
+        // }
     };
 
     return (
@@ -83,8 +87,12 @@ const GetStarted = () => {
                             maxLength={10}
                             value={phone}
                             onChangeText={(text) => {
+                                const cleaned = text.replace(/[^0-9]/g, "");
                                 setError("");
-                                setPhone(text.replace(/[^0-9]/g, ""));
+                                setPhone(cleaned);
+                                if (cleaned.length === 10) {
+                                    Keyboard.dismiss();
+                                }
                             }}
                         />
                         {/* Character counter */}
