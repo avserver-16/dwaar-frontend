@@ -8,8 +8,7 @@ const HomeScreen = () => {
     <GradientBackground>
       <Header title="Home" showNotification={true} />
       <View style={styles.center}>
-        <Text style={styles.title}>Home</Text>
-        <Text style={styles.subtitle}>Your dashboard and updates live here.</Text>
+       
       </View>
     </GradientBackground>
   );
