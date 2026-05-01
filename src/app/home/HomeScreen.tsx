@@ -1,36 +1,48 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import GradientBackground from "../../../styles/Background";
 import Header from "../../Molecules/Header";
+import Card from "../../Molecules/Card";
+import Hero from "./HeroSection";
 
 const HomeScreen = () => {
+const d=[
+  {title:"Sigma",subtitle:"250m"},
+  {title:"Sigma-Plus",subtitle:"500m"},
+  {title:"Delta",subtitle:"750m"},
+  {title:"Delta-Plus",subtitle:"1km"},
+  {title:"Zeta",subtitle:"2km"},
+  {title:"Enigma",subtitle:"10km"},
+
+]
+
   return (
     <GradientBackground>
       <Header title="Home" showNotification={true} />
-      <View style={styles.center}>
-       
-      </View>
+      <Hero />
+      <ScrollView contentContainerStyle={styles.container}>
+        {[...Array(6)].map((_, i) => (
+          <View key={i} style={styles.cardWrapper}>
+            <Card title={d[i].title} subtitle={d[i].subtitle} />
+          </View>
+        ))}
+      </ScrollView>
     </GradientBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
+  container: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    // paddingHorizontal: 16,
+    paddingTop: 16,
+    marginTop: 24
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#1a1a1a",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: "#9AB17A",
-    textAlign: "center",
+  cardWrapper: { 
+    width:'45%',
+    marginBottom: 16,
+    marginHorizontal: 6,
   },
 });
 
