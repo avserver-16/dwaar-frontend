@@ -13,10 +13,10 @@ const MainTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#1a1a1a",
-        tabBarInactiveTintColor: "#9AB17A",
+        tabBarInactiveTintColor: "#737373",
+        tabBarActiveTintColor: "#9AB17A",
         tabBarStyle: {
-          backgroundColor: "#C3CC9B",
+          backgroundColor: "#000000",
           borderTopColor: "#9AB17A55",
           paddingTop: 10,
         },

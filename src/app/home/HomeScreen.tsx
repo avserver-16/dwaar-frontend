@@ -1,31 +1,39 @@
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import GradientBackground from "../../../styles/Background";
 import Header from "../../Molecules/Header";
 import Card from "../../Molecules/Card";
 import Hero from "./HeroSection";
+import { Ionicons } from "@expo/vector-icons";
+import { Text } from "react-native";
+import { fonts } from "../../../styles/globalStyles";
+import Distances from "../../Molecules/Distances";
+import Conversation from "../../Molecules/Conversations";
 
 const HomeScreen = () => {
-const d=[
-  {title:"Sigma",subtitle:"250m"},
-  {title:"Sigma-Plus",subtitle:"500m"},
-  {title:"Delta",subtitle:"750m"},
-  {title:"Delta-Plus",subtitle:"1km"},
-  {title:"Zeta",subtitle:"2km"},
-  {title:"Enigma",subtitle:"10km"},
-
-]
 
   return (
     <GradientBackground>
-      <Header title="Home" showNotification={true} />
-      <Hero />
+      <Header title="Dwaar" showNotification={true} />
       <ScrollView contentContainerStyle={styles.container}>
-        {[...Array(6)].map((_, i) => (
-          <View key={i} style={styles.cardWrapper}>
-            <Card title={d[i].title} subtitle={d[i].subtitle} />
-          </View>
-        ))}
+        <Hero />
+        <View style={styles.locationContainer}>
+          <Ionicons name="location" size={24} color="#9AB17A" />
+          <Text style={styles.locationText}>Andheri West, Mumbai</Text>
+        </View>
+        <Distances distances={['100m', '500m', '1km', '5km', '10km']} />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12,width:'100%' }}>
+          <Text style={styles.locationText}>Active Conversations</Text>
+          <TouchableOpacity>
+            <Text style={{ color: '#9AB17A', fontSize: 14, fontFamily: fonts.Eregular }}>View All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 0 }}>
+         <Conversation name="John Doe" />
+         <Conversation name="John Doe" />
+         <Conversation name="John Doe" />
+         
+        </View>
       </ScrollView>
     </GradientBackground>
   );
@@ -36,13 +44,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     // paddingHorizontal: 16,
-    paddingTop: 16,
-    marginTop: 24
+    paddingTop: 40,
+    // marginTop: 24,
+    backgroundColor: 'transparent'
   },
-  cardWrapper: { 
-    width:'45%',
+  cardWrapper: {
+    width: '45%',
     marginBottom: 16,
     marginHorizontal: 6,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    // paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  locationText: {
+    fontSize: 20,
+    // fontWeight: 'bold',
+    color: 'white',
+    fontFamily: fonts.EsemiBold
   },
 });
 

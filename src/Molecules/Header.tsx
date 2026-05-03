@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { fonts } from "../../styles/globalStyles";
 
 interface HeaderProps {
     title?: string;
@@ -61,6 +62,9 @@ const Header: React.FC<HeaderProps> = ({
                         <Ionicons name="notifications-outline" size={22} color="#000" />
                     </TouchableOpacity>
                 )}
+                <View style={{ width: 30, height: 30, borderRadius: 20, backgroundColor: "#9AB17A", alignItems: "center", justifyContent: "center" }} >
+                    <Ionicons name="person" size={16} color="#000" />
+                </View>
             </View>
         </View>
     );
@@ -75,7 +79,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 0,
-        top:32
+        top: 32,
+        marginBottom: 30
     },
 
     left: {
@@ -93,6 +98,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: "600",
+        fontFamily: fonts.Ebold,
+        color: "#FFFFFF"
     },
 
     iconBtn: {
