@@ -8,12 +8,14 @@ import {
     ActivityIndicator,
     TouchableWithoutFeedback,
     Keyboard,
+    Image,
 } from "react-native";
 import GradientBackground from "../../styles/Background";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
 import MainTabNavigator from "../app/tabs/MainTabNavigator";
+import { fonts } from "../../styles/globalStyles";
 
 
 type NavigationProp = NativeStackNavigationProp<
@@ -51,7 +53,7 @@ const GetStarted = () => {
         // if (!isValid) return;
         // setError("");
         // setLoading(true);
-      
+
         // try {
         //     const exists = await checkPhoneExists(phone);
         //     if (exists) {
@@ -72,9 +74,11 @@ const GetStarted = () => {
             <GradientBackground>
                 <View style={styles.container}>
                     <View style={styles.logoContainer}>
-                        <Text style={styles.logoText}>Dwaar</Text>
+                        <Image source={require("../../assets/dwaar.png")} style={{ width: 315, height: 300, top: 60, }} />
                     </View>
-
+                    <Text style={styles.questionText}>What's your number?</Text>
+                    <Text style={styles.subText}>Your entrance to the local community. We'll
+                        send a code to verify your connection.</Text>
                     <View style={styles.inputWrapper}>
                         <View style={styles.countryCode}>
                             <Text style={styles.countryCodeText}>+91</Text>
@@ -141,8 +145,10 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
     },
     logoContainer: {
-        marginTop: 200,
+        marginTop: 20,
         alignItems: "center",
+        alignSelf: "center",
+        left: 10
     },
     logoText: {
         fontSize: 64,
@@ -160,12 +166,15 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         borderWidth: 1,
         borderColor: "rgba(255,255,255,0.2)",
-        top: 10,
+        top: 70,
         left: 10,
         zIndex: 1,
     },
     countryCodeText: {
         fontSize: 18,
+        fontFamily: fonts.Eregular,
+        top:2,
+        right:2
     },
     input: {
         width: "100%",
@@ -176,6 +185,9 @@ const styles = StyleSheet.create({
         padding: 16,
         paddingLeft: 80,
         borderColor: "#9AB17A",
+        top:60,
+        color:"#9AB17A",
+        fontFamily:fonts.Eregular
     },
     inputError: {
         borderColor: "#e06c6c",
@@ -183,7 +195,7 @@ const styles = StyleSheet.create({
     counter: {
         position: "absolute",
         right: 20,
-        top: 18,
+        top: 80,
         fontSize: 13,
         color: "#9AB17A99",
     },
@@ -207,6 +219,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         fontSize: 12,
         color: "#9AB17A",
+        fontFamily: fonts.Eregular
     },
     nextButton: {
         width: "100%",
@@ -222,6 +235,24 @@ const styles = StyleSheet.create({
     nextButtonText: {
         fontSize: 16,
         color: "#000000",
+        fontFamily: fonts.Ebold
+    },
+    questionText: {
+        fontSize: 24,
+        color: "#FFFFFF",
+        alignSelf: "center",
+        marginBottom: 12,
+        fontFamily: fonts.Ebold,
+        marginTop: 100
+    },
+    subText: {
+        fontSize: 12,
+        color: "#A0A0A0",
+        alignSelf: "center",
+        marginBottom: 20,
+        fontFamily: fonts.Eregular,
+        marginTop: 0,
+        textAlign: "center",
     },
 });
 
