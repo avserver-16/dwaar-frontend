@@ -1,34 +1,3 @@
-# Dwaar
-
-> A hyperlocal community platform that connects people through proximity, shared interests, and real-world interaction.
-
-## Overview
-
-Most social platforms connect users globally, but meaningful interactions often happen locally.
-**Dwaar** focuses on building communities that are physically relevant to a user’s location.
-
-Using location-based intelligence, users can discover and join nearby groups within a configurable radius, interact in real time, participate in local discussions, and engage with communities that matter around them.
-
-The platform is designed to make digital interactions more contextual, trusted, and actionable in the real world.
-
----
-
-# Problem Statement
-
-Current social interaction platforms are not location-context aware.
-Users often interact with people and communities that are geographically irrelevant, reducing opportunities for meaningful local engagement.
-
-There is no seamless platform that:
-
-* connects nearby people dynamically,
-* creates radius-based communities,
-* enables hyperlocal discussions,
-* and supports real-world collaboration.
-
-**Dwaar** solves this by introducing a proximity-first community architecture.
-
----
-
 # Key Features
 
 ## 1. Radius-Based Community Discovery
