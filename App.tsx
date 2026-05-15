@@ -2,10 +2,11 @@ import React, { useEffect } from "react";
 import Navigator from "./navigation/Navigator";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Prevent splash screen from auto hiding
 SplashScreen.preventAutoHideAsync();
-
+const queryClient = new QueryClient();
 const App = () => {
   const [fontsLoaded] = useFonts({
     "Epilogue-Bold": require('../dwaar/src/fonts/Epilogue-Bold.ttf'),
@@ -31,7 +32,11 @@ const App = () => {
     return null; // keep splash visible
   }
 
-  return <Navigator />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Navigator />
+    </QueryClientProvider>
+  );
 };
 
 export default App;

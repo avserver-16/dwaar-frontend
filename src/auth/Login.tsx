@@ -6,48 +6,63 @@ import {
     TouchableOpacity,
     View,
     ScrollView,
-    KeyboardAvoidingView, // ← add this
+    KeyboardAvoidingView, 
     Platform,
     Keyboard,
-    TouchableWithoutFeedbackBase,
-    TouchableWithoutFeedback,             // ← add this
+    TouchableWithoutFeedback,            
 } from "react-native";
 import GradientBackground from "../../styles/Background";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
 import type { RootStackParamList } from "../../navigation/types";
+import { useMutation } from "@tanstack/react-query";
+import { loginUser } from "../../api/auth";
 
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList, "Login">;
 type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const ROLES = [
-    { id: "resident", label: "🏠 Resident", sub: "Homeowner / Tenant" },
-    { id: "courier", label: "📦 Courier", sub: "Delivery Personnel" },
-    { id: "guardian", label: "🛡️ Guardian", sub: "Security / Watchman" },
-];
+
 
 const Login = () => {
     const navigation = useNavigation<NavigationProp>();
     const rootNavigation = navigation.getParent<RootNavigationProp>();
-    const route = useRoute<RouteProp<AuthStackParamList, "Login">>();
-    const { phone } = route.params;
 
-    const [email, setEmail] = useState("");
+    const route = useRoute<RouteProp<AuthStackParamList, "Login">>();
+    const { phone, email: prefillEmail } = route.params;
+
+    const [email, setEmail] = useState(prefillEmail ?? "");
+
     const [password, setPassword] = useState("");
-    const [selectedRole, setSelectedRole] = useState<string | null>(null);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showPass, setShowPass] = useState(false);
 
-    const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
+
+
+    const { mutate: signIn, isPending } = useMutation({
+        mutationFn: () => loginUser({ phone, email, password }),
+        onSuccess: () =>
+            rootNavigation?.reset({ index: 0, routes: [{ name: "Main" }] }),
+        onError: (err: Error) => {
+            console.error(err);
+        },
+    });
+
+    const maskEmail = (email: string) => {
+        if (!email) return "";
+        const [local, domain] = email.split("@");
+        if (!domain) return email;
+        const visible = local.slice(0, 2);           // first 2 chars
+        const masked = "*".repeat(Math.max(local.length - 2, 3));
+        return `${visible}${masked}@${domain}`;
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <GradientBackground>
                 <KeyboardAvoidingView  // ← wrap here
                     style={{ flex: 1 }}
-                    behavior={Platform.OS === "ios" ? "padding" : "height"} // ← ios needs "padding", android "height"
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
                     keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
                 >
                     <ScrollView
@@ -58,64 +73,28 @@ const Login = () => {
                         {/* Header */}
                         <View style={styles.header}>
                             <Text style={styles.logoText}>Dwaar</Text>
-                            <Text style={styles.subtitle}>Welcome back · +91 {phone}</Text>
+                            <Text style={styles.subtitle}>Welcome back · +91-{phone}</Text>
+                            {/* {prefillEmail ? (
+                                <Text style={styles.prefillHint}>
+                                    Signing in as {maskEmail(prefillEmail)}
+                                </Text>
+                            ) : null} */}
                         </View>
 
                         {/* Form */}
                         <View style={styles.form}>
-                            {/* Role Dropdown */}
-                            <View style={styles.fieldGroup}>
-                                <Text style={styles.label}>I am a...</Text>
-                                <TouchableOpacity
-                                    style={[styles.input, styles.dropdownTrigger]}
-                                    onPress={() => setDropdownOpen(!dropdownOpen)}
-                                    activeOpacity={0.8}
-                                >
-                                    <Text
-                                        style={
-                                            selectedRoleObj
-                                                ? styles.dropdownSelected
-                                                : styles.dropdownPlaceholder
-                                        }
-                                    >
-                                        {selectedRoleObj ? selectedRoleObj.label : "Select your role"}
-                                    </Text>
-                                    <Text style={styles.chevron}>{dropdownOpen ? "▲" : "▼"}</Text>
-                                </TouchableOpacity>
 
-                                {dropdownOpen && (
-                                    <View style={styles.dropdownMenu}>
-                                        {ROLES.map((role, idx) => (
-                                            <TouchableOpacity
-                                                key={role.id}
-                                                style={[
-                                                    styles.dropdownItem,
-                                                    selectedRole === role.id && styles.dropdownItemActive,
-                                                    idx < ROLES.length - 1 && styles.dropdownItemBorder,
-                                                ]}
-                                                onPress={() => {
-                                                    setSelectedRole(role.id);
-                                                    setDropdownOpen(false);
-                                                }}
-                                            >
-                                                <Text style={styles.dropdownItemLabel}>{role.label}</Text>
-                                                <Text style={styles.dropdownItemSub}>{role.sub}</Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                )}
-                            </View>
 
                             {/* Email */}
                             <View style={styles.fieldGroup}>
                                 <Text style={styles.label}>Email</Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input,{color:"#9ab17a69"}]}
                                     placeholder="you@example.com"
                                     placeholderTextColor="#9AB17A99"
                                     keyboardType="email-address"
                                     autoCapitalize="none"
-                                    value={email}
+                                    value={maskEmail(email)}
                                     onChangeText={setEmail}
                                 />
                             </View>
@@ -156,17 +135,12 @@ const Login = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.loginButton,
-                                    (!email || !password || !selectedRole) &&
+                                    (!email || !password) &&
                                     styles.loginButtonDisabled,
                                 ]}
                                 activeOpacity={0.85}
-                                disabled={!email || !password || !selectedRole}
-                                onPress={() =>
-                                    rootNavigation?.reset({
-                                        index: 0,
-                                        routes: [{ name: "Main" }],
-                                    })
-                                }
+                                disabled={isPending || !email || !password}
+                                onPress={() => signIn()}
                             >
                                 <Text style={styles.loginButtonText}>Sign In</Text>
                             </TouchableOpacity>
@@ -181,7 +155,7 @@ const Login = () => {
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
-                </KeyboardAvoidingView> {/* ← close here */}
+                </KeyboardAvoidingView>
             </GradientBackground>
         </TouchableWithoutFeedback>
     );
@@ -229,7 +203,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         paddingHorizontal: 20,
         borderColor: "#9AB17A",
-        color: "#1a1a1a",
+        color: "#9AB17A",
         backgroundColor: "rgba(255,255,255,0.08)",
     },
     passwordWrapper: {
@@ -335,6 +309,12 @@ const styles = StyleSheet.create({
     registerLinkBold: {
         fontWeight: "700",
         color: "#6a8a4a",
+    },
+    prefillHint: {
+        fontSize: 13,
+        color: "#9AB17A99",
+        marginTop: 4,
+        fontStyle: "italic",
     },
 });
 

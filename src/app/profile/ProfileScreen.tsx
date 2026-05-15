@@ -3,17 +3,30 @@ import { StyleSheet, Text, View } from "react-native";
 import GradientBackground from "../../../styles/Background";
 import Header from "../../Molecules/Header";
 import Options from "../../Molecules/Options";
+import { logoutUser } from "../../../api/auth";
+import { useNavigation } from "@react-navigation/native";
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
   return (
     <GradientBackground>
       <Header title="Profile" showNotification={true} showSearch={true} />
       <View style={styles.center}>
         <View style={styles.profileContainer}></View>
-        <Options title="Account Settings" iconName="chevron-forward-outline" />
-        <Options title="Privacy Policy" iconName="chevron-forward-outline" />
-        <Options title="Help & Support" iconName="chevron-forward-outline" />
-        <Options title="Logout" iconName="chevron-forward-outline" />
+        <Options title="Account Settings" iconName="chevron-forward-outline" iconColor="#9AB17A" />
+        <Options title="Privacy Policy" iconName="chevron-forward-outline" iconColor="#9AB17A" />
+        <Options title="Help & Support" iconName="chevron-forward-outline" iconColor="#9AB17A" />
+        <Options
+          title="Logout"
+          iconName="chevron-forward-outline"
+          iconColor="#9AB17A"
+          onPress={() => {
+            logoutUser();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Auth" as never }],
+            });
+          }} />
       </View>
     </GradientBackground>
   );
@@ -25,7 +38,7 @@ const styles = StyleSheet.create({
     // justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 4,
-    marginTop:64
+    marginTop: 64
   },
   title: {
     fontSize: 32,
@@ -45,7 +58,7 @@ const styles = StyleSheet.create({
     width: 120,
     borderRadius: 100,
     backgroundColor: "#C3CC9B",
-    marginBottom:48
+    marginBottom: 48
   },
 });
 

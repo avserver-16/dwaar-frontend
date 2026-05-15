@@ -101,16 +101,16 @@ const styles = StyleSheet.create({
     title: {
       fontSize: 18,
       fontWeight: "500",
-      color: "#000",
+      color: "#9AB17A",
     },
   
     subtitle: {
       fontSize: 13,
-      color: "#666",
+      color: "#9AB17A",
     },
   
     subTag: {
       fontSize: 12,
-      color: "#888",
+      color: "#9AB17A",
     },
   });
