@@ -8,7 +8,7 @@ import MainTabNavigator from "../../src/app/tabs/MainTabNavigator";
 
 export type AuthStackParamList = {
   GetStarted: undefined;
-  Login: { phone: string };
+  Login: { phone: string, email?: string };
   Register: { phone: string };
   MainTabNavigator: undefined;
 };

@@ -12,29 +12,38 @@ import GradientBackground from "../../styles/Background";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
+import { useMutation } from "@tanstack/react-query";
+import { registerUser } from "../../api/auth";
+import { RootStackParamList } from "../../navigation/types";
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList, "Register">;
 
-const ROLES = [
-  { id: "resident", label: "Resident", sub: "Homeowner / Tenant" },
-  { id: "courier", label: "Courier", sub: "Delivery Personnel" },
-  { id: "guardian", label: "Guardian", sub: "Security / Watchman" },
-];
+
+
+type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 
 const Register = () => {
-  const navigation = useNavigation<NavigationProp>();
+  // const navigation = useNavigation<NavigationProp>();
+  const [registerError, setRegisterError] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
-
-  const selectedRoleObj = ROLES.find((r) => r.id === selectedRole);
-  const route = useRoute<RouteProp<AuthStackParamList, "Login">>();
+  const navigation = useNavigation<NavigationProp>();
+  const rootNavigation = navigation.getParent<RootNavigationProp>();
+  const route = useRoute<RouteProp<AuthStackParamList, "Register">>();
   const { phone } = route.params;
+  const { mutate: register, isPending } = useMutation({
+    mutationFn: () =>
+      registerUser({ phone, name: username, email, password }), // hardcoded since removing roles
+    onSuccess: () =>
+      rootNavigation?.reset({ index: 0, routes: [{ name: "Main" }] }), // ← go to Main directly
+    onError: (err: Error) => setRegisterError(err.message),
+  });
+
   return (
     <GradientBackground>
       <ScrollView
@@ -131,47 +140,11 @@ const Register = () => {
           </View>
 
           {/* Role Dropdown */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>I am a...</Text>
-            <TouchableOpacity
-              style={[styles.input, styles.dropdownTrigger]}
-              onPress={() => setDropdownOpen(!dropdownOpen)}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={
-                  selectedRoleObj ? styles.dropdownSelected : styles.dropdownPlaceholder
-                }
-              >
-                {selectedRoleObj ? selectedRoleObj.label : "Select your role"}
-              </Text>
-              <Text style={styles.chevron}>{dropdownOpen ? "▲" : "▼"}</Text>
-            </TouchableOpacity>
 
-            {dropdownOpen && (
-              <View style={styles.dropdownMenu}>
-                {ROLES.map((role, idx) => (
-                  <TouchableOpacity
-                    key={role.id}
-                    style={[
-                      styles.dropdownItem,
-                      selectedRole === role.id && styles.dropdownItemActive,
-                      idx < ROLES.length - 1 && styles.dropdownItemBorder,
-                    ]}
-                    onPress={() => {
-                      setSelectedRole(role.id);
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownItemLabel}>{role.label}</Text>
-                    <Text style={styles.dropdownItemSub}>{role.sub}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
         </View>
-
+        {registerError ? (
+          <Text style={styles.errorText}>{registerError}</Text>
+        ) : null}
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.termsText}>
@@ -180,13 +153,14 @@ const Register = () => {
           <TouchableOpacity
             style={[
               styles.registerButton,
-              (!email || !username || !password || !confirmPassword || !selectedRole) &&
+              (!email || !username || !password || !confirmPassword || password !== confirmPassword) &&
               styles.registerButtonDisabled,
             ]}
             activeOpacity={0.85}
             disabled={
-              !email || !username || !password || !confirmPassword || !selectedRole
+              isPending || !email || !username || !password || !confirmPassword || password !== confirmPassword
             }
+            onPress={() => register()}
           >
             <Text style={styles.registerButtonText}>Create Account</Text>
           </TouchableOpacity>
@@ -259,7 +233,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 20,
     borderColor: "#9AB17A",
-    color: "#1a1a1a",
+    color: "#9AB17A",
     backgroundColor: "rgba(255,255,255,0.08)",
   },
   passwordWrapper: {

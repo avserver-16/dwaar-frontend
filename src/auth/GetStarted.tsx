@@ -16,6 +16,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
 import MainTabNavigator from "../app/tabs/MainTabNavigator";
 import { fonts } from "../../styles/globalStyles";
+import { useMutation } from "@tanstack/react-query";
+import { checkPhone } from "../../api/auth";
 
 
 type NavigationProp = NativeStackNavigationProp<
@@ -43,30 +45,25 @@ type NavigationProp = NativeStackNavigationProp<
 const GetStarted = () => {
     const navigation = useNavigation<NavigationProp>();
     const [phone, setPhone] = useState("");
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const { mutate, isPending } = useMutation({
+    
+        mutationFn: () => checkPhone(phone),
+        onSuccess: (data) => {
+            console.log("Phone check response:", phone);
+            console.log(data);
+            if (data.exists) {
+                // pre-fill email on Login so user doesn't retype it
+                navigation.navigate("Login", { phone, email: data.user.email });
+            } else {
+                navigation.navigate("Register", { phone });
+            }
+        },
+        onError: () => setError("Something went wrong. Please try again."),
+    });
+
     const isValid = phone.length === 10;
-
-    const handleNext = async () => {
-        navigation.navigate("MainTabNavigator");
-        // if (!isValid) return;
-        // setError("");
-        // setLoading(true);
-
-        // try {
-        //     const exists = await checkPhoneExists(phone);
-        //     if (exists) {
-        //         navigation.navigate("Login", { phone });
-        //     } else {
-        //         navigation.navigate("Register", { phone });
-        //     }
-        // } catch {
-        //     setError("Something went wrong. Please try again.");
-        // } finally {
-        //     setLoading(false);
-        // }
-    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -120,13 +117,13 @@ const GetStarted = () => {
                         <TouchableOpacity
                             style={[
                                 styles.nextButton,
-                                (!isValid || loading) && styles.nextButtonDisabled,
+                                (!isValid || isPending) && styles.nextButtonDisabled,
                             ]}
-                            onPress={handleNext}
-                            disabled={!isValid || loading}
+                            onPress={() => mutate()}
+                            disabled={!isValid || isPending}
                             activeOpacity={0.85}
                         >
-                            {loading ? (
+                            {isPending ? (
                                 <ActivityIndicator color="#000" size="small" />
                             ) : (
                                 <Text style={styles.nextButtonText}>Next</Text>
@@ -173,8 +170,8 @@ const styles = StyleSheet.create({
     countryCodeText: {
         fontSize: 18,
         fontFamily: fonts.Eregular,
-        top:2,
-        right:2
+        top: 2,
+        right: 2
     },
     input: {
         width: "100%",
@@ -185,9 +182,9 @@ const styles = StyleSheet.create({
         padding: 16,
         paddingLeft: 80,
         borderColor: "#9AB17A",
-        top:60,
-        color:"#9AB17A",
-        fontFamily:fonts.Eregular
+        top: 60,
+        color: "#9AB17A",
+        fontFamily: fonts.Eregular
     },
     inputError: {
         borderColor: "#e06c6c",
