@@ -211,3 +211,44 @@ export const refreshAccessToken = async () => {
     return null;
   }
 };
+
+export const fetchUserLocation =
+  async () => {
+    try {
+      const token =
+        await AsyncStorage.getItem(
+          "authToken"
+        );
+
+      const response = await fetch(
+        `${BASE}/get-location`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+          },
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.msg ||
+            "Failed to fetch location"
+        );
+      }
+
+      return data.location;
+    } catch (error) {
+      console.log(
+        "Fetch location error:",
+        error
+      );
+
+      return null;
+    }
+  };
