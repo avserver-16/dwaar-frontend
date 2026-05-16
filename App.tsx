@@ -3,6 +3,7 @@ import Navigator from "./navigation/Navigator";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AppProvider } from "./src/context/AppContext";
 
 // Prevent splash screen from auto hiding
 SplashScreen.preventAutoHideAsync();
@@ -34,7 +35,9 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Navigator />
+      <AppProvider>
+        <Navigator />
+      </AppProvider>
     </QueryClientProvider>
   );
 };

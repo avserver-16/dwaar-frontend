@@ -5,6 +5,7 @@ import Header from "../../Molecules/Header";
 import Options from "../../Molecules/Options";
 import { logoutUser } from "../../../api/auth";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -20,8 +21,11 @@ const ProfileScreen = () => {
           title="Logout"
           iconName="chevron-forward-outline"
           iconColor="#9AB17A"
-          onPress={() => {
-            logoutUser();
+          onPress={async () => {
+            await logoutUser();
+            await AsyncStorage.removeItem("authToken");
+            await AsyncStorage.removeItem("refreshToken");
+            await AsyncStorage.removeItem("authUser");
             navigation.reset({
               index: 0,
               routes: [{ name: "Auth" as never }],
