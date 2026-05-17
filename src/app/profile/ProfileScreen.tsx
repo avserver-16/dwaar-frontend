@@ -126,6 +126,7 @@ const ProfileScreen = () => {
       />
 
       <View style={styles.center}>{renderContent()}</View>
+      <Text style={{ color: "#9ab17a83", fontSize: 8, marginTop: 20, textAlign: "center", fontFamily: fonts.Eregular }}>Version 1.26.0</Text>
     </GradientBackground>
   );
 };
