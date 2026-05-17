@@ -19,6 +19,8 @@ interface HeaderProps {
 
     showNotification?: boolean;
     onNotificationPress?: () => void;
+    showMenu?: boolean;
+    onMenuPress?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -31,6 +33,8 @@ const Header: React.FC<HeaderProps> = ({
 
     showNotification = false,
     onNotificationPress,
+    showMenu = false,
+    onMenuPress,
 }) => {
     return (
         <View style={styles.container}>
@@ -39,10 +43,14 @@ const Header: React.FC<HeaderProps> = ({
             <View style={styles.left}>
                 {showBack && (
                     <TouchableOpacity onPress={onBackPress} style={styles.iconBtn}>
-                        <Ionicons name="chevron-back" size={24} color="#000" />
+                        <Ionicons name="chevron-back" size={24} color="#9AB17A" />
                     </TouchableOpacity>
                 )}
-
+                {showMenu && (
+                    <TouchableOpacity onPress={onMenuPress} style={styles.iconBtn}>
+                        <Ionicons name="menu" size={24} color="#9AB17A" />
+                    </TouchableOpacity>
+                )}
                 {title && <Text style={styles.title}>{title}</Text>}
             </View>
 
@@ -59,12 +67,12 @@ const Header: React.FC<HeaderProps> = ({
                         onPress={onNotificationPress}
                         style={styles.iconBtn}
                     >
-                        <Ionicons name="notifications-outline" size={22} color="#000" />
+                        <Ionicons name="notifications-outline" size={22} color="#9AB17A" />
                     </TouchableOpacity>
                 )}
-                <View style={{ width: 30, height: 30, borderRadius: 20, backgroundColor: "#9AB17A", alignItems: "center", justifyContent: "center" }} >
+                {/* <View style={{ width: 30, height: 30, borderRadius: 20, backgroundColor: "#9AB17A", alignItems: "center", justifyContent: "center" }} >
                     <Ionicons name="person" size={16} color="#000" />
-                </View>
+                </View> */}
             </View>
         </View>
     );
