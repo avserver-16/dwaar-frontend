@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     StyleSheet,
     Text,
@@ -6,55 +6,140 @@ import {
     TouchableOpacity,
     View,
     ActivityIndicator,
-    TouchableWithoutFeedback,
+    Pressable,
     Keyboard,
     Image,
+    Animated,
+    KeyboardEvent,
+    Platform,
 } from "react-native";
 import GradientBackground from "../../styles/Background";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/auth/AuthStack";
-import MainTabNavigator from "../app/tabs/MainTabNavigator";
 import { fonts } from "../../styles/globalStyles";
 import { useMutation } from "@tanstack/react-query";
 import { checkPhone } from "../../api/auth";
 
-
-type NavigationProp = NativeStackNavigationProp<
-    AuthStackParamList,
-    "GetStarted"
->;
-
-
-// const checkPhoneExists = async (phone: string): Promise<boolean> => {
-//     return true
-//     try {
-//         const response = await fetch("https://your-api.com/auth/check-phone", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({ phone: `+91${phone}` }),
-//         });
-//         const data = await response.json();
-//         return data.exists; // expects { exists: true | false }
-//     } catch (error) {
-//         console.error("Phone check failed:", error);
-//         throw error;
-//     }
-// };
+type NavigationProp = NativeStackNavigationProp<AuthStackParamList, "GetStarted">;
 
 const GetStarted = () => {
     const navigation = useNavigation<NavigationProp>();
     const [phone, setPhone] = useState("");
     const [error, setError] = useState("");
 
+    // Animated values
+    const imageScale = useRef(new Animated.Value(1)).current;
+    const imageOpacity = useRef(new Animated.Value(1)).current;
+    const inputTranslateY = useRef(new Animated.Value(0)).current;
+    const textOpacity = useRef(new Animated.Value(1)).current;
+    const textTranslateY = useRef(new Animated.Value(0)).current;
+    const logoBounce = useRef(new Animated.Value(0)).current;
+
+    // Subtle continuous float/bounce
+    useEffect(() => {
+        const loop = Animated.loop(
+            Animated.sequence([
+                Animated.timing(logoBounce, {
+                    toValue: -10,
+                    duration: 1300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(logoBounce, {
+                    toValue: 0,
+                    duration: 1300,
+                    useNativeDriver: true,
+                }),
+            ])
+        );
+        loop.start();
+        return () => loop.stop();
+    }, []);
+
+    useEffect(() => {
+        const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+        const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+        const onShow = (e: KeyboardEvent) => {
+            const duration = Platform.OS === "ios" ? e.duration || 280 : 220;
+
+            Animated.parallel([
+                // Scale down and fade the image
+                Animated.timing(imageScale, {
+                    toValue: 0.55,
+                    duration,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(imageOpacity, {
+                    toValue: 0.7,
+                    duration,
+                    useNativeDriver: true,
+                }),
+                // Slide input upward
+                Animated.timing(inputTranslateY, {
+                    toValue: -e.endCoordinates.height * 0.45,
+                    duration,
+                    useNativeDriver: true,
+                }),
+                // Fade + slide up the question/sub text
+                Animated.timing(textOpacity, {
+                    toValue: 0,
+                    duration: duration * 0.7,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(textTranslateY, {
+                    toValue: -20,
+                    duration,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        };
+
+        const onHide = (e: KeyboardEvent) => {
+            const duration = Platform.OS === "ios" ? e.duration || 280 : 220;
+
+            Animated.parallel([
+                Animated.timing(imageScale, {
+                    toValue: 1,
+                    duration,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(imageOpacity, {
+                    toValue: 1,
+                    duration,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(inputTranslateY, {
+                    toValue: 0,
+                    duration,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(textOpacity, {
+                    toValue: 1,
+                    duration,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(textTranslateY, {
+                    toValue: 0,
+                    duration,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        };
+
+        const showSub = Keyboard.addListener(showEvent, onShow);
+        const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
+
     const { mutate, isPending } = useMutation({
-    
         mutationFn: () => checkPhone(phone),
         onSuccess: (data) => {
-            console.log("Phone check response:", phone);
-            console.log(data);
             if (data.exists) {
-                // pre-fill email on Login so user doesn't retype it
                 navigation.navigate("Login", { phone, email: data.user.email });
             } else {
                 navigation.navigate("Register", { phone });
@@ -66,17 +151,48 @@ const GetStarted = () => {
     const isValid = phone.length === 10;
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <GradientBackground>
+            <Pressable style={styles.container} onPress={Keyboard.dismiss}>
 
-            <GradientBackground>
-                <View style={styles.container}>
-                    <View style={styles.logoContainer}>
-                        <Image source={require("../../assets/dwaar.png")} style={{ width: 315, height: 300, top: 60, }} />
-                    </View>
-                    <Text style={styles.questionText}>What's your number?</Text>
-                    <Text style={styles.subText}>Your entrance to the local community. We'll
-                        send a code to verify your connection.</Text>
-                    <View style={styles.inputWrapper}>
+                    {/* Logo — scales down on keyboard open */}
+                    <Animated.View
+                        style={[
+                            styles.logoContainer,
+                            {
+                                transform: [
+                                    { scale: imageScale },
+                                    { translateY: logoBounce },
+                                ],
+                                opacity: imageOpacity,
+                            },
+                        ]}
+                    >
+                        <Image
+                            source={require("../../assets/dwaar.png")}
+                            style={{ width: 315, height: 300, top: 60 }}
+                        />
+                    </Animated.View>
+
+                    {/* Question + sub text — fades out on keyboard open */}
+                    <Animated.View
+                        style={{
+                            opacity: textOpacity,
+                            transform: [{ translateY: textTranslateY }],
+                        }}
+                    >
+                        <Text style={styles.questionText}>What's your number?</Text>
+                        <Text style={styles.subText}>
+                            Your entrance to the local community. We'll send a code to verify your connection.
+                        </Text>
+                    </Animated.View>
+
+                    {/* Input — slides up above keyboard */}
+                    <Animated.View
+                        style={[
+                            styles.inputWrapper,
+                            { transform: [{ translateY: inputTranslateY }] },
+                        ]}
+                    >
                         <View style={styles.countryCode}>
                             <Text style={styles.countryCodeText}>+91</Text>
                         </View>
@@ -96,11 +212,10 @@ const GetStarted = () => {
                                 }
                             }}
                         />
-                        {/* Character counter */}
                         {phone.length > 0 && (
                             <Text style={styles.counter}>{phone.length}/10</Text>
                         )}
-                    </View>
+                    </Animated.View>
 
                     {/* Error message */}
                     {error ? (
@@ -113,7 +228,6 @@ const GetStarted = () => {
                         <Text style={styles.termsText}>
                             Please carefully read the Terms & Policy
                         </Text>
-
                         <TouchableOpacity
                             style={[
                                 styles.nextButton,
@@ -130,9 +244,8 @@ const GetStarted = () => {
                             )}
                         </TouchableOpacity>
                     </View>
-                </View>
-            </GradientBackground>
-        </TouchableWithoutFeedback>
+            </Pressable>
+        </GradientBackground>
     );
 };
 
@@ -145,15 +258,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         alignItems: "center",
         alignSelf: "center",
-        left: 10
-    },
-    logoText: {
-        fontSize: 64,
-    },
-    inputWrapper: {
-        position: "absolute",
-        bottom: 320,
-        width: "100%",
+        left: 10,
     },
     countryCode: {
         position: "absolute",
@@ -171,7 +276,12 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontFamily: fonts.Eregular,
         top: 2,
-        right: 2
+        right: 2,
+    },
+    inputWrapper: {
+        position: "absolute",
+        bottom: 320,
+        width: "100%",
     },
     input: {
         width: "100%",
@@ -184,7 +294,7 @@ const styles = StyleSheet.create({
         borderColor: "#9AB17A",
         top: 60,
         color: "#9AB17A",
-        fontFamily: fonts.Eregular
+        fontFamily: fonts.Eregular,
     },
     inputError: {
         borderColor: "#e06c6c",
@@ -216,7 +326,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         fontSize: 12,
         color: "#9AB17A",
-        fontFamily: fonts.Eregular
+        fontFamily: fonts.Eregular,
     },
     nextButton: {
         width: "100%",
@@ -232,7 +342,7 @@ const styles = StyleSheet.create({
     nextButtonText: {
         fontSize: 16,
         color: "#000000",
-        fontFamily: fonts.Ebold
+        fontFamily: fonts.Ebold,
     },
     questionText: {
         fontSize: 24,
@@ -240,7 +350,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         marginBottom: 12,
         fontFamily: fonts.Ebold,
-        marginTop: 100
+        marginTop: 100,
     },
     subText: {
         fontSize: 12,

@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
         fontSize: 64,
         fontWeight: "700",
         letterSpacing: -2,
+        color:"#9ab17a"
     },
     subtitle: {
         fontSize: 16,
