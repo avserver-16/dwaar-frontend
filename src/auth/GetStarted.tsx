@@ -180,9 +180,9 @@ const GetStarted = () => {
                             transform: [{ translateY: textTranslateY }],
                         }}
                     >
-                        <Text style={styles.questionText}>What's your number?</Text>
+                        <Text style={styles.questionText}>What&apos;s your number?</Text>
                         <Text style={styles.subText}>
-                            Your entrance to the local community. We'll send a code to verify your connection.
+                            Your entrance to the local community. We&apos;ll send a code to verify your connection.
                         </Text>
                     </Animated.View>
 

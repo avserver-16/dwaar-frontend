@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View , Text } from "react-native";
 import GradientBackground from "../../../styles/Background";
 import Header from "../../Molecules/Header";
 import Card from "../../Molecules/Card";
 import Hero from "./HeroSection";
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "react-native";
+
 import { fonts } from "../../../styles/globalStyles";
 import Distances from "../../Molecules/Distances";
 import Conversation from "../../Molecules/Conversations";
