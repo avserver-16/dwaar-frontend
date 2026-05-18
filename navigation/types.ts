@@ -11,4 +11,10 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  ChatStreaming: {
+    chatType: "INDIVIDUAL" | "GROUP";
+    chatId: string;
+    currentUserId: string;
+  };
 };
+
