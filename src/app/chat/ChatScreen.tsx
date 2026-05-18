@@ -9,11 +9,11 @@ const ChatScreen = () => {
     <GradientBackground>
       <Header title="Inbox" showNotification={true} showSearch={true} />
       <View style={styles.center}>
-       <Chats title="Delivery Guy - Avish (1)" iconName="time-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} />
-       <Chats title="Delivery Boy - Gukesh (2)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} />
-       <Chats title="Delivery Boy - Raghavendra (3)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} />
-       <Chats title="Delivery Boy - Somnath (4)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} />
-       <Chats title="Delivery Boy - Kashish (5)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} />
+       <Chats title="Delivery Guy - Avish (1)" iconName="time-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} iconColor="white"/>
+       <Chats title="Delivery Boy - Gukesh (2)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} iconColor="white"/>
+       <Chats title="Delivery Boy - Raghavendra (3)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} iconColor="white"/>
+       <Chats title="Delivery Boy - Somnath (4)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} iconColor="white"/>
+       <Chats title="Delivery Boy - Kashish (5)" iconName="checkmark-outline" subtitle="Hello, how are you?" subtitleStyle={styles.subtitle} iconColor="white"/>
       </View>
     </GradientBackground>
   );
