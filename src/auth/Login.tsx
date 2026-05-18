@@ -149,7 +149,7 @@ const Login = () => {
                                 onPress={() => navigation.navigate("Register", { phone })}
                             >
                                 <Text style={styles.registerLink}>
-                                    Don't have an account?{" "}
+                                    Don&apos;t have an account?{" "}
                                     <Text style={styles.registerLinkBold}>Register</Text>
                                 </Text>
                             </TouchableOpacity>
@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
         fontSize: 64,
         fontWeight: "700",
         letterSpacing: -2,
+        color:"#9ab17a"
     },
     subtitle: {
         fontSize: 16,

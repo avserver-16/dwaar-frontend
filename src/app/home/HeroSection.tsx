@@ -8,7 +8,7 @@ const Hero = () => {
     return (
         <View style={styles.card}>
             <Text style={styles.title}>Your doorway to
-                what's happening
+                what&apos;s happening
                 nearby.</Text>
             <Text style={styles.subtitle}>Opening the door to your neighborhood.</Text>
 

@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AuthStack from "./auth/AuthStack";
 import MainTabNavigator from "../src/app/tabs/MainTabNavigator";
 import type { RootStackParamList } from "./types";
+import ChatStreaming from "../src/app/chat/ChatStreaming";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -14,6 +15,7 @@ const RootNavigator = () => {
     >
       <Stack.Screen name="Auth" component={AuthStack} />
       <Stack.Screen name="Main" component={MainTabNavigator} />
+      <Stack.Screen name="ChatStreaming" component={ChatStreaming} />
     </Stack.Navigator>
   );
 };

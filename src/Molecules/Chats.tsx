@@ -105,18 +105,18 @@ const styles = StyleSheet.create({
     title: {
       fontSize: 16,
       fontWeight: "500",
-      color: "#000",
+      color: "#9AB17A",
       top:-8
     },
   
     subtitle: {
       fontSize: 13,
-      color: "#666",
+      color: "#9ab17a77",
     },
   
     subTag: {
       fontSize: 12,
-      color: "#888",
+      color: "#9ab17a78",
     },
     profileContainerWrapper: {
       flexDirection: "row",
