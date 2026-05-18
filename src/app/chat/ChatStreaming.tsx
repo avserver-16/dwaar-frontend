@@ -11,6 +11,11 @@ import {
     Image,
     Dimensions,
     Platform,
+    Modal,
+    Pressable,
+    Animated,
+    Keyboard,
+    KeyboardEvent,
 } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
@@ -21,6 +26,7 @@ import { Audio } from "expo-av";
 import GradientBackground from "../../../styles/Background";
 import { fonts } from "../../../styles/globalStyles";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
@@ -59,8 +65,40 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
     const [input, setInput] = useState("");
 
     const [recording, setRecording] = useState<Audio.Recording | null>(null);
-
+    const [showOptions, setShowOptions] = useState(false);
     const flatListRef = useRef<FlatList>(null);
+
+    // Animated value for bottom offset
+    const bottomAnim = useRef(new Animated.Value(20)).current;
+
+    useEffect(() => {
+        const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+        const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+        const onShow = (e: KeyboardEvent) => {
+            Animated.timing(bottomAnim, {
+                toValue: e.endCoordinates.height + 10,
+                duration: Platform.OS === "ios" ? e.duration || 250 : 200,
+                useNativeDriver: false,
+            }).start();
+        };
+
+        const onHide = (e: KeyboardEvent) => {
+            Animated.timing(bottomAnim, {
+                toValue: 20,
+                duration: Platform.OS === "ios" ? e.duration || 250 : 200,
+                useNativeDriver: false,
+            }).start();
+        };
+
+        const showSub = Keyboard.addListener(showEvent, onShow);
+        const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
 
     useEffect(() => {
         // Hardcoded Initial Return Message
@@ -328,12 +366,15 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
             </View>
         );
     };
-
+    const navigation = useNavigation();
     return (
         <GradientBackground>
             <View style={styles.container}>
                 {/* Header */}
                 <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Ionicons name="chevron-back" size={24} color="white" />
+                    </TouchableOpacity>
                     <Text style={styles.headerTitle}>
                         {chatType === "GROUP"
                             ? "Group Chat"
@@ -348,10 +389,12 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
                     keyExtractor={(item) => item.id}
                     renderItem={renderMessage}
                     contentContainerStyle={styles.list}
+                    showsVerticalScrollIndicator={false}
                 />
 
-                {/* Input */}
-                <View style={styles.bottomContainer}>
+                {/* Input — animated bottom offset */}
+                <Animated.View style={[styles.bottomContainer, { bottom: bottomAnim }]}>
+                    
                     <TextInput
                         placeholder="Message..."
                         value={input}
@@ -361,30 +404,95 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
                         placeholderTextColor="#9ab17ad1"
                     />
 
-                    <TouchableOpacity onPress={pickImage} style={styles.actionBtn}>
-                        <Text>🖼️</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={pickVideo} style={styles.actionBtn}>
-                        <Text>🎥</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={pickFile} style={styles.actionBtn}>
-                        <Text>📎</Text>
-                    </TouchableOpacity>
-
                     <TouchableOpacity
-                        onPressIn={startRecording}
-                        onPressOut={stopRecording}
-                        style={styles.actionBtn}
+                        style={styles.plusButton}
+                        onPress={() => setShowOptions(true)}
                     >
-                        <Text>🎤</Text>
+                        <Ionicons
+                            name="add"
+                            size={24}
+                            color="black"
+                        />
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={sendText} style={styles.sendBtn}>
-                       <Ionicons name="send" size={24} color="black"  style={{right:-2}}/>
+                        <Ionicons name="send" size={24} color="black" style={{ right: -2 }} />
                     </TouchableOpacity>
-                </View>
+                </Animated.View>
+
+                <Modal
+                    visible={showOptions}
+                    transparent
+                    animationType="fade"
+                >
+                    <Pressable
+                        style={styles.modalOverlay}
+                        onPress={() => setShowOptions(false)}
+                    >
+                        <View style={styles.popupContainer}>
+                            <TouchableOpacity
+                                style={styles.popupOption}
+                                onPress={() => {
+                                    setShowOptions(false);
+                                    pickImage();
+                                }}
+                            >
+                                <Ionicons
+                                    name="image-outline"
+                                    size={22}
+                                    color="white"
+                                />
+                                <Text style={styles.popupText}>Image</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.popupOption}
+                                onPress={() => {
+                                    setShowOptions(false);
+                                    pickVideo();
+                                }}
+                            >
+                                <Ionicons
+                                    name="videocam-outline"
+                                    size={22}
+                                    color="white"
+                                />
+                                <Text style={styles.popupText}>Video</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.popupOption}
+                                onPress={() => {
+                                    setShowOptions(false);
+                                    pickFile();
+                                }}
+                            >
+                                <Ionicons
+                                    name="document-outline"
+                                    size={22}
+                                    color="white"
+                                />
+                                <Text style={styles.popupText}>File</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.popupOption}
+                                onPressIn={startRecording}
+                                onPressOut={() => {
+                                    stopRecording();
+                                    setShowOptions(false);
+                                }}
+                            >
+                                <Ionicons
+                                    name="mic-outline"
+                                    size={22}
+                                    color="white"
+                                />
+                                <Text style={styles.popupText}>Audio</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Modal>
             </View>
         </GradientBackground>
     );
@@ -399,14 +507,14 @@ export default ChatStreaming;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // backgroundColor: "#0E0E0E",
     },
 
     header: {
         paddingTop: Platform.OS === "ios" ? 60 : 30,
         paddingBottom: 15,
-        // paddingHorizontal: 20,
-        // backgroundColor: "#151515",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
     },
 
     headerTitle: {
@@ -466,26 +574,24 @@ const styles = StyleSheet.create({
 
     bottomContainer: {
         position: "absolute",
-        bottom: 20,
+        // bottom is now driven by Animated.Value
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 10,
         paddingVertical: 10,
-        // backgroundColor: "#151515",
     },
 
     input: {
         flex: 1,
-        // backgroundColor: "#262626",
         color: "white",
         borderRadius: 25,
         paddingHorizontal: 15,
         paddingVertical: 16,
-        // maxHeight: 100,
         fontFamily: fonts.Eregular,
         borderWidth: 1,
         borderColor: "#9ab17ad1",
+        marginRight: 10,
+        backgroundColor: "black",
     },
 
     actionBtn: {
@@ -503,13 +609,72 @@ const styles = StyleSheet.create({
         transform: [{ rotate: "-45deg" }],
     },
 
-  
-    
     timeText: {
         color: "rgba(255, 255, 255, 0.5)",
         fontSize: 8,
         fontFamily: fonts.Eregular,
         marginTop: 12,
         alignSelf: "flex-end",
+    },
+
+    attachWrapper: {
+        marginLeft: 10,
+        alignItems: "center",
+    },
+
+    plusButton: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        backgroundColor: "#9ab17a",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    optionsContainer: {
+        position: "absolute",
+        bottom: 55,
+        alignItems: "center",
+    },
+
+    optionButton: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        backgroundColor: "#1A1A1A",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.1)",
+    },
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        justifyContent: "flex-end",
+    },
+
+    popupContainer: {
+        backgroundColor: "#1A1A1A",
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingVertical: 25,
+        paddingHorizontal: 20,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+    },
+
+    popupOption: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 16,
+    },
+
+    popupText: {
+        color: "white",
+        marginLeft: 14,
+        fontSize: 15,
+        fontFamily: fonts.Eregular,
     },
 });
