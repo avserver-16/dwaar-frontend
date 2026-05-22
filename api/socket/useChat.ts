@@ -26,7 +26,7 @@ export interface Message {
 const API_BASE = "http://localhost:5000/api"; // ← replace
 
 async function fetchRoomMessages(roomId: string): Promise<Message[]> {
-  const res = await fetch(`${API_BASE}/rooms/${roomId}/messages`);
+  const res = await fetch(`${API_BASE}/messages/rooms/${roomId}`);
   if (!res.ok) throw new Error("Failed to fetch messages");
   return res.json();
 }
@@ -99,6 +99,7 @@ export function useRoomChat(roomId: string, currentUserId: string) {
       fileName?: string;
       thumbnail?: string;
     }) => {
+      console.log("Sending message:", payload);
       if (!socket) throw new Error("Socket not connected");
 
       // Optimistic update
@@ -195,6 +196,7 @@ export function usePrivateChat(currentUserId: string, toUserId: string) {
       fileName?: string;
       thumbnail?: string;
     }) => {
+      console.log("Sending private message:", payload,socket);
       if (!socket) throw new Error("Socket not connected");
 
       const optimistic: Message = {

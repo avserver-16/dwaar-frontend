@@ -21,8 +21,8 @@ const CURRENT_USER_ID =
 const CHATS = [
   {
     title: "Delivery Guy - Avish",
-    chatId: "user_1",
-    toUserId: "user_2",
+    chatId: "6a108e2d02739e86e3427c1a",
+    toUserId: "6a108e9702739e86e3427c1b",
     iconName: "time-outline" as const,
   },
   {
@@ -45,8 +45,8 @@ const CHATS = [
   },
   {
     title: "Delivery Boy - Kashish",
-    chatId: "user_2",
-    toUserId: "user_1",
+    chatId: "6a108e9702739e86e3427c1b",
+    toUserId: "6a108e2d02739e86e3427c1a",
     iconName: "checkmark-outline" as const,
   },
 ];

@@ -131,6 +131,7 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
 
     // ── Send helpers ─────────────────────────────────────────────────────────
     const sendText = () => {
+        console.log("Sending text:", input);
         if (!input.trim()) return;
         sendMessage.mutate({ content: input, type: "TEXT" });
         setInput("");
