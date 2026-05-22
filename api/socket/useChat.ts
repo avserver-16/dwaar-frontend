@@ -1,5 +1,5 @@
 // hooks/useChat.ts
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   useQuery,
   useMutation,
@@ -64,16 +64,19 @@ export function useRoomChat(roomId: string, currentUserId: string) {
     socket.emit("join_room", roomId);
 
     const handleMessage = (data: {
+      _id: string;
       message: string;
       sender: { id: string; name: string };
       timestamp: string;
+      isPrivate: boolean;
     }) => {
       const incoming: Message = {
-        id: `${Date.now()}-${Math.random()}`,
+        id: data._id,
         senderId: data.sender.id,
         type: "TEXT",
         content: data.message,
         createdAt: data.timestamp,
+        isPrivate: data.isPrivate,
       };
 
       // Append to the cached list without a full refetch
@@ -155,6 +158,7 @@ export function usePrivateChat(currentUserId: string, toUserId: string) {
     if (!socket) return;
 
     const handlePrivateMessage = (data: {
+      _id: string;
       message: string;
       sender: { id: string };
       toUserId: string;
@@ -168,7 +172,7 @@ export function usePrivateChat(currentUserId: string, toUserId: string) {
       ) return;
 
       const incoming: Message = {
-        id: `${Date.now()}-${Math.random()}`,
+        id: data._id,
         senderId: data.sender.id,
         type: "TEXT",
         content: data.message,
@@ -292,5 +296,3 @@ export function useOnlineUsers() {
   });
 }
 
-// need useState for useTypingIndicator
-import { useState } from "react";
