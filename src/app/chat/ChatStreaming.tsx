@@ -47,7 +47,7 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
     const { chatType, chatId, currentUserId, toUserId = "" } = route.params;
 
     const isPrivate = chatType === "INDIVIDUAL";
-
+    const [typingDots, setTypingDots] = useState(".");
     // ── Pick the right hook based on chat type ───────────────────────────────
     const roomChat = useRoomChat(chatId, currentUserId);
     const privateChat = usePrivateChat(currentUserId, toUserId);
@@ -71,6 +71,19 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
 
     // ── Keyboard animation ───────────────────────────────────────────────────
     const bottomAnim = useRef(new Animated.Value(20)).current;
+
+    useEffect(() => {
+        if (!remoteTyping) return;
+
+        const interval = setInterval(() => {
+            setTypingDots(prev => {
+                if (prev === "...") return ".";
+                return prev + ".";
+            });
+        }, 400);
+
+        return () => clearInterval(interval);
+    }, [remoteTyping]);
 
     useEffect(() => {
         const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
@@ -203,14 +216,14 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
     // ── Render ────────────────────────────────────────────────────────────────
     const renderMessage = ({ item }: { item: Message }) => {
         const isMine = item.senderId === currentUserId;
-        const isOptimistic = item.id.startsWith("optimistic-");
+        // const isOptimistic = item.id.startsWith("optimistic-");
 
         return (
             <View
                 style={[
                     styles.messageContainer,
                     isMine ? styles.myMessage : styles.otherMessage,
-                    isOptimistic && { opacity: 0.6 },
+                    // isOptimistic && { opacity: 0.6 },
                 ]}
             >
                 {item.type === "TEXT" && (
@@ -271,7 +284,11 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
                         showsVerticalScrollIndicator={false}
                         ListFooterComponent={
                             remoteTyping ? (
-                                <Text style={styles.typingText}>typing…</Text>
+                                <View style={styles.typingContainer}>
+                                    <Text style={styles.typingText}>
+                                        typing{typingDots}
+                                    </Text>
+                                </View>
                             ) : null
                         }
                     />
@@ -372,14 +389,14 @@ const styles = StyleSheet.create({
     },
     list: { paddingTop: 15, paddingBottom: 100 },
     loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-    typingText: {
-        color: "rgba(255,255,255,0.4)",
-        fontSize: 12,
-        fontStyle: "italic",
-        paddingHorizontal: 16,
-        paddingBottom: 8,
-        fontFamily: fonts.Eregular,
-    },
+    // typingText: {
+    //     color: "rgba(255,255,255,0.4)",
+    //     fontSize: 12,
+    //     fontStyle: "italic",
+    //     paddingHorizontal: 16,
+    //     paddingBottom: 8,
+    //     fontFamily: fonts.Eregular,
+    // },
     messageContainer: {
         maxWidth: "80%",
         marginBottom: 12,
@@ -465,6 +482,17 @@ const styles = StyleSheet.create({
         color: "white",
         marginLeft: 14,
         fontSize: 15,
+        fontFamily: fonts.Eregular,
+    },
+    typingContainer: {
+        paddingHorizontal: 16,
+        paddingBottom: 8,
+    },
+
+    typingText: {
+        color: "rgba(255,255,255,0.5)",
+        fontSize: 13,
+        fontStyle: "italic",
         fontFamily: fonts.Eregular,
     },
 });

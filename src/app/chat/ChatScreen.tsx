@@ -1,79 +1,144 @@
 // ChatScreen.tsx
-import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import GradientBackground from "../../../styles/Background";
 import Header from "../../Molecules/Header";
 import Chats from "../../Molecules/Chats";
+import { Ionicons } from "@expo/vector-icons";
+import { fonts } from "../../../styles/globalStyles";
 
-// ─── Simulated current user ───────────────────────────────────────────────────
-// Replace with your real auth (AsyncStorage, context, zustand, etc.)
-const CURRENT_USER_ID =
-  Platform.OS === "web"
-    ? new URLSearchParams(window.location.search).get("userId") ?? "user_1"
-    : "user_1";
+const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
-// ─── Chat directory ───────────────────────────────────────────────────────────
-// Each entry maps a display title → a stable chatId and a toUserId.
-// chatId   : the room/conversation identifier your backend uses
-// toUserId : the OTHER person's userId (needed for private socket events)
-const CHATS = [
-  {
-    title: "Delivery Guy - Avish",
-    chatId: "6a108e2d02739e86e3427c1a",
-    toUserId: "6a108e9702739e86e3427c1b",
-    iconName: "time-outline" as const,
-  },
-  {
-    title: "Delivery Boy - Gukesh",
-    chatId: "chat_gukesh",
-    toUserId: "user_gukesh",
-    iconName: "checkmark-outline" as const,
-  },
-  {
-    title: "Delivery Boy - Raghavendra",
-    chatId: "chat_raghavendra",
-    toUserId: "user_raghavendra",
-    iconName: "checkmark-outline" as const,
-  },
-  {
-    title: "Delivery Boy - Somnath",
-    chatId: "chat_somnath",
-    toUserId: "user_somnath",
-    iconName: "checkmark-outline" as const,
-  },
-  {
-    title: "Delivery Boy - Kashish",
-    chatId: "6a108e9702739e86e3427c1b",
-    toUserId: "6a108e2d02739e86e3427c1a",
-    iconName: "checkmark-outline" as const,
-  },
-];
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Conversation {
+  _id: string;
+  participants: {
+    _id: string;
+    name: string;
+    phone?: string;
+  }[];
+  lastMessage?: {
+    message: string;
+    createdAt: string;
+  };
+}
+
+interface ChatItem {
+  chatId: string;
+  toUserId: string;
+  title: string;
+  subtitle: string;
+}
+
+// ─── API helper ───────────────────────────────────────────────────────────────
+
+async function fetchConversations(userId: string, token: string): Promise<Conversation[]> {
+  const res = await fetch(`${API_BASE}/conversations/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  console.log("Response:", res);
+  if (!res.ok) throw new Error("Failed to fetch conversations");
+  return res.json();
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const ChatScreen = () => {
   const navigation = useNavigation<any>();
 
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [chats, setChats] = useState<ChatItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // 1. Read session from AsyncStorage
+        const token = await AsyncStorage.getItem("authToken");
+        const userStr = await AsyncStorage.getItem("authUser");
+
+        if (!token || !userStr) {
+          setError("Not logged in");
+          return;
+        }
+
+        const user = JSON.parse(userStr);
+        const userId: string = user._id;
+        setCurrentUserId(userId);
+
+        // 2. Fetch conversations
+        const conversations = await fetchConversations(userId, token);
+
+        // 3. Shape into chat items — filter out self, use the other participant
+        const shaped: ChatItem[] = conversations.map((conv) => {
+          const other = conv.participants.find((p) => p._id !== userId);
+
+          return {
+            chatId: conv._id,           // conversation/room id
+            toUserId: other?._id ?? "", // the other person's userId
+            title: other?.name ?? "Unknown",
+            subtitle: conv.lastMessage?.message ?? "Say hello!",
+          };
+        });
+
+        setChats(shaped);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load chats");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
   const openChat = (chatId: string, toUserId: string) => {
+    if (!currentUserId) return;
     navigation.navigate("ChatStreaming", {
       chatType: "INDIVIDUAL",
       chatId,
-      currentUserId: CURRENT_USER_ID,
-      toUserId,           // ← now passed correctly
+      currentUserId,
+      toUserId,
     });
   };
 
   return (
     <GradientBackground>
-      <Header title="Inbox" showNotification={true} showSearch={true} />
+      <Header title="Inbox" showNotification />
 
       <View style={styles.center}>
-        {CHATS.map((chat) => (
+        {loading && <ActivityIndicator color="#9ab17a" style={{ marginTop: 40 }} />}
+
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
+        {!loading && !error && chats.length === 0 && (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="chatbubbles-outline" size={64} color="white" style={{ marginBottom: 16 }} />
+            <Text style={styles.emptyTitle}>
+              No Chats Yet
+            </Text>
+
+            <Text style={styles.emptySubtitle}>
+              Start a conversation and your chats will appear here.
+            </Text>
+          </View>
+        )}
+
+        {!loading && !error && chats.length > 0 && chats.map((chat) => (
           <Chats
             key={chat.chatId}
             title={chat.title}
-            iconName={chat.iconName}
-            subtitle="Hello, how are you?"
+            iconName="chatbubble-outline"
+            subtitle={chat.subtitle}
             subtitleStyle={styles.subtitle}
             iconColor="white"
             onPress={() => openChat(chat.chatId, chat.toUserId)}
@@ -96,6 +161,38 @@ const styles = StyleSheet.create({
     left: 48,
     top: -16,
   },
+  errorText: {
+    color: "rgba(255,255,255,0.5)",
+    marginTop: 40,
+    fontSize: 14,
+  },
+  emptyContainer: {
+  marginTop: 120,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: 30,
+},
+
+emptyIcon: {
+  fontSize: 54,
+  marginBottom: 16,
+},
+
+emptyTitle: {
+  color: "white",
+  fontSize: 20,
+  fontWeight: "700",
+  marginBottom: 8,
+  fontFamily: fonts.Ebold,
+},
+
+emptySubtitle: {
+  color: "rgba(255,255,255,0.5)",
+  textAlign: "center",
+  lineHeight: 22,
+  fontSize: 14,
+  fontFamily: fonts.Eregular,
+},
 });
 
 export default ChatScreen;
