@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "dwaar",
+    "name": "Dwaar",
     "slug": "dwaar",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/appLogo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/appLogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/appLogo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -25,7 +25,7 @@
       "package": "com.avishcreates16.dwaar"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/appLogo.png"
     },
     "plugins": [
       "expo-font"
