@@ -252,3 +252,23 @@ export const fetchUserLocation =
       return null;
     }
   };
+
+
+
+export const fetchNearbyBuildings = async (radius: number) => {
+  const token = await AsyncStorage.getItem("authToken");
+  if (!token) throw new Error("Not authenticated");
+
+  const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/nearby-buildings`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ radius }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch buildings");
+  return data;
+};
