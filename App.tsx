@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+// App.tsx
+import React, { useEffect, useState } from "react";
 import Navigator from "./navigation/Navigator";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
@@ -7,12 +8,13 @@ import { AppProvider } from "./src/context/AppContext";
 import { SocketProvider } from "./api/socket/SocketProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Prevent splash screen from auto hiding
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
   const [fontsLoaded] = useFonts({
     "Epilogue-Bold": require("../dwaar/src/fonts/Epilogue-Bold.ttf"),
     "Epilogue-Extra-Bold": require("../dwaar/src/fonts/Epilogue-ExtraBold.ttf"),
@@ -25,30 +27,32 @@ const App = () => {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
+    if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded]);
 
+  // Read real userId from AsyncStorage on mount
   useEffect(() => {
-    const fetchUser = async () => {
-      const user = await AsyncStorage.getItem("authUser");
-      // setUser(JSON.parse(user || "{}"));
+    const loadUser = async () => {
+      try {
+        const userStr = await AsyncStorage.getItem("authUser");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setCurrentUserId(user._id ?? null);
+        }
+      } catch (err) {
+        console.log("Failed to load user from storage:", err);
+      }
     };
 
-    fetchUser();
+    loadUser();
   }, []);
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
-  const params = new URLSearchParams(window.location.search);
-  const CURRENT_USER_ID = params.get("userId") ?? "user_1";
+  if (!fontsLoaded) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SocketProvider userId={CURRENT_USER_ID}>
+      {/* userId=null is fine — SocketProvider won't connect until it's set */}
+      <SocketProvider userId={currentUserId}>
         <AppProvider>
           <Navigator />
         </AppProvider>

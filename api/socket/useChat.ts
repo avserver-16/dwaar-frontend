@@ -166,10 +166,9 @@ export function usePrivateChat(currentUserId: string, toUserId: string) {
       isPrivate: boolean;
     }) => {
       // Only update this conversation's cache
-      if (
-        data.sender.id !== toUserId &&
-        data.sender.id !== currentUserId
-      ) return;
+      if (data.sender.id === currentUserId) return;
+
+      if (data.sender.id !== toUserId) return;
 
       const incoming: Message = {
         id: data._id,
