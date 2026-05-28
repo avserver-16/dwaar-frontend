@@ -12,13 +12,19 @@ import {
 } from 'react-native';
 
 import { getApps } from 'react-native-map-link';
+
 type MapApp = {
   id: string;
   name: string;
   icon: any;
   open: () => void;
 };
-const GetLocation = () => {
+
+type Props = {
+  onClose: () => void;
+};
+
+const GetLocation = ({ onClose }: Props) => {
   const [availableApps, setAvailableApps] = useState<MapApp[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,9 +42,6 @@ const GetLocation = () => {
 
         googleForceLatLon: false,
         alwaysIncludeGoogle: true,
-
-        appsWhiteList: ['google-maps'],
-        appsBlackList: ['uber'],
       });
 
       setAvailableApps(result);
@@ -53,26 +56,33 @@ const GetLocation = () => {
     return (
       <Pressable style={styles.card} onPress={item.open}>
         <Image source={item.icon} style={styles.icon} />
-
         <Text style={styles.appName}>{item.name}</Text>
       </Pressable>
     );
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Available Map Apps</Text>
+    <View style={styles.popupContainer}>
+      <View style={styles.popup}>
+        <View style={styles.header}>
+          <Text style={styles.heading}>Open Location</Text>
 
-      {loading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <FlatList
-          data={availableApps}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContainer}
-        />
-      )}
+          <Pressable onPress={onClose}>
+            <Text style={styles.close}>✕</Text>
+          </Pressable>
+        </View>
+
+        {loading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <FlatList
+            data={availableApps}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContainer}
+          />
+        )}
+      </View>
     </View>
   );
 };
@@ -80,16 +90,36 @@ const GetLocation = () => {
 export default GetLocation;
 
 const styles = StyleSheet.create({
-  container: {
+  popupContainer: {
     flex: 1,
-    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+
+  popup: {
+    width: '90%',
     backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    maxHeight: '70%',
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
   },
 
   heading: {
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 20,
+  },
+
+  close: {
+    fontSize: 22,
+    fontWeight: '700',
   },
 
   listContainer: {
@@ -102,6 +132,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     backgroundColor: '#F5F5F5',
+    marginBottom: 12,
   },
 
   icon: {
