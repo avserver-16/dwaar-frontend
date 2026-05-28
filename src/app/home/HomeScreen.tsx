@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View, Text, ActivityIndicator, Modal, Pressable } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import GradientBackground from "../../../styles/Background";
 import Header from "../../Molecules/Header";
@@ -10,21 +10,22 @@ import Distances from "../../Molecules/Distances";
 import Conversation from "../../Molecules/Conversations";
 import { fetchCurrentUser, fetchUserLocation, fetchNearbyBuildings } from "../../../api/auth";
 import Group from "../../Molecules/ActiveGroups";
+import GetLocation from "./GetLocation";
 
 // ─── Distance options mapped to meters ───────────────────────────────────────
 const DISTANCE_OPTIONS = [
   { label: "100m", value: 100 },
   { label: "500m", value: 500 },
-  { label: "1km",  value: 1000 },
-  { label: "5km",  value: 5000 },
-  { label: "7km",  value: 7000 },
+  { label: "1km", value: 1000 },
+  { label: "5km", value: 5000 },
+  { label: "7km", value: 7000 },
 
   // { label: "10km", value: 10000 },
 ];
 
 const HomeScreen = () => {
   const [selectedRadius, setSelectedRadius] = useState(500); // default 500m
-
+  const [visible, setVisible] = useState(false);
   // ── Current user ─────────────────────────────────────────────────────────
   const { data: userData } = useQuery({
     queryKey: ["currentUser"],
@@ -50,7 +51,13 @@ const HomeScreen = () => {
     queryFn: () => fetchNearbyBuildings(selectedRadius),
     staleTime: 60_000, // 1 min
   });
+const truncateText = (text: string, limit: number = 7) => {
+  if (text.length <= limit) {
+    return text;
+  }
 
+  return text.substring(0, limit) + '...';
+};
   const buildings = buildingData?.buildings ?? [];
   // console.log("Building data:", buildingData);
   return (
@@ -64,10 +71,31 @@ const HomeScreen = () => {
 
         {/* Location */}
         <View style={styles.locationContainer}>
-          <Ionicons name="location" size={24} color="#9AB17A" />
-          <Text style={styles.locationText}>
-            {location?.city ?? "—"}, {location?.region ?? "—"}
-          </Text>
+          <View style={styles.locationContent}>
+            <Ionicons name="location" size={24} color="#9AB17A" />
+            <Text style={styles.locationText}>
+              {truncateText(location?.city ?? "—")}
+            </Text>
+          </View>
+          <View style={styles.modalContainer}>
+            <Pressable
+              style={styles.button}
+              onPress={() => setVisible(true)}
+            >
+              <Ionicons name="location" size={24} color="#000" />
+              <Text style={styles.buttonText}>
+                My Location
+              </Text>
+            </Pressable>
+
+            <Modal
+              visible={visible}
+              transparent
+              animationType="fade"
+            >
+              <GetLocation onClose={() => setVisible(false)} lat={location?.latitude ?? 0} lng={location?.longitude ?? 0} title={location?.city ?? ""} />
+            </Modal>
+          </View>
         </View>
 
         {/* Distance selector — tapping changes the radius and auto-refetches */}
@@ -126,6 +154,9 @@ const HomeScreen = () => {
           <Group name="Morning Yoga" />
           <Group name="Evening Walk" />
         </View>
+
+
+
       </ScrollView>
     </GradientBackground>
   );
@@ -143,6 +174,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingVertical: 12,
+    justifyContent: "space-between",
+    width: "100%",
   },
   sectionHeader: {
     flexDirection: "row",
@@ -170,6 +203,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 0,
+  },
+  modalContainer: {
+    // flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    flexDirection: "row",
+  },
+  button: {
+    backgroundColor: "#9AB17A",
+    padding: 10,
+    borderRadius: 100,
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  buttonText: {
+    color: "#000",
+    fontSize: 16,
+    fontFamily: fonts.EsemiBold,
+  },
+  locationContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
 });
 
