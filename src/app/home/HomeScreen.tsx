@@ -10,6 +10,7 @@ import Distances from "../../Molecules/Distances";
 import Conversation from "../../Molecules/Conversations";
 import { fetchCurrentUser, fetchUserLocation, fetchNearbyBuildings } from "../../../api/auth";
 import Group from "../../Molecules/ActiveGroups";
+import GetLocation from "./GetLocation";
 
 // ─── Distance options mapped to meters ───────────────────────────────────────
 const DISTANCE_OPTIONS = [
@@ -125,6 +126,9 @@ const HomeScreen = () => {
           <Group name="Sunday Jog" />
           <Group name="Morning Yoga" />
           <Group name="Evening Walk" />
+        </View>
+        <View style={{ height: 200 }} >
+        <GetLocation />
         </View>
       </ScrollView>
     </GradientBackground>
