@@ -12,19 +12,26 @@ import {
 } from 'react-native';
 
 import { getApps } from 'react-native-map-link';
+import { Ionicons } from '@expo/vector-icons';
+import { fonts } from '../../../styles/globalStyles';
 
 type MapApp = {
   id: string;
   name: string;
   icon: any;
   open: () => void;
+  lat: number;
+  lng: number;
 };
 
 type Props = {
   onClose: () => void;
+  lat: number;
+  lng: number;
+  title: string;
 };
 
-const GetLocation = ({ onClose }: Props) => {
+const GetLocation = ({ onClose, lat, lng, title }: Props) => {
   const [availableApps, setAvailableApps] = useState<MapApp[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,16 +42,20 @@ const GetLocation = ({ onClose }: Props) => {
   const fetchMapApps = async () => {
     try {
       const result = await getApps({
-        latitude: 38.8976763,
-        longitude: -77.0387185,
-        address: '1600 Pennsylvania Avenue NW, Washington, DC 20500',
-        title: 'The White House',
+        latitude: lat,
+        longitude: lng,
+        address: '',
+        title:title,
 
         googleForceLatLon: false,
         alwaysIncludeGoogle: true,
       });
 
-      setAvailableApps(result);
+      setAvailableApps(result.map((app) => ({
+        ...app,
+        lat,
+        lng,
+      })));
     } catch (error) {
       console.log('Error fetching map apps:', error);
     } finally {
@@ -68,7 +79,7 @@ const GetLocation = ({ onClose }: Props) => {
           <Text style={styles.heading}>Open Location</Text>
 
           <Pressable onPress={onClose}>
-            <Text style={styles.close}>✕</Text>
+            <Ionicons name="close" size={24} color="#9AB17A" />
           </Pressable>
         </View>
 
@@ -99,10 +110,12 @@ const styles = StyleSheet.create({
 
   popup: {
     width: '90%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#000',
     borderRadius: 20,
     padding: 20,
     maxHeight: '70%',
+    borderWidth: 1,
+    borderColor: '#9AB17A',
   },
 
   header: {
@@ -115,11 +128,15 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 22,
     fontWeight: '700',
+    fontFamily: fonts.Ebold,
+    color: '#9AB17A',
   },
 
   close: {
     fontSize: 22,
     fontWeight: '700',
+    fontFamily: fonts.Ebold,
+    color: '#9AB17A',
   },
 
   listContainer: {
@@ -131,7 +148,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderRadius: 12,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#9AB17A',
     marginBottom: 12,
   },
 
@@ -140,10 +157,12 @@ const styles = StyleSheet.create({
     height: 40,
     marginRight: 15,
     resizeMode: 'contain',
+    tintColor: '#9AB17A',
   },
 
   appName: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: fonts.Emedium,
   },
 });

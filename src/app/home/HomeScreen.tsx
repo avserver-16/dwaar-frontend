@@ -51,7 +51,13 @@ const HomeScreen = () => {
     queryFn: () => fetchNearbyBuildings(selectedRadius),
     staleTime: 60_000, // 1 min
   });
+const truncateText = (text: string, limit: number = 7) => {
+  if (text.length <= limit) {
+    return text;
+  }
 
+  return text.substring(0, limit) + '...';
+};
   const buildings = buildingData?.buildings ?? [];
   // console.log("Building data:", buildingData);
   return (
@@ -68,7 +74,7 @@ const HomeScreen = () => {
           <View style={styles.locationContent}>
             <Ionicons name="location" size={24} color="#9AB17A" />
             <Text style={styles.locationText}>
-              {location?.city ?? "—"}, {location?.region ?? "—"}
+              {truncateText(location?.city ?? "—")}
             </Text>
           </View>
           <View style={styles.modalContainer}>
@@ -76,7 +82,10 @@ const HomeScreen = () => {
               style={styles.button}
               onPress={() => setVisible(true)}
             >
-              <Text style={styles.buttonText}>Open Maps Popup</Text>
+              <Ionicons name="location" size={24} color="#000" />
+              <Text style={styles.buttonText}>
+                My Location
+              </Text>
             </Pressable>
 
             <Modal
@@ -84,7 +93,7 @@ const HomeScreen = () => {
               transparent
               animationType="fade"
             >
-              <GetLocation onClose={() => setVisible(false)} />
+              <GetLocation onClose={() => setVisible(false)} lat={location?.latitude ?? 0} lng={location?.longitude ?? 0} title={location?.city ?? ""} />
             </Modal>
           </View>
         </View>
@@ -200,15 +209,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
+    flexDirection: "row",
   },
   button: {
     backgroundColor: "#9AB17A",
-    padding: 16,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 100,
     marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   buttonText: {
-    color: "white",
+    color: "#000",
     fontSize: 16,
     fontFamily: fonts.EsemiBold,
   },
