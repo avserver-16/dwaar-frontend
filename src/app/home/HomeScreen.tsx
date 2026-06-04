@@ -11,6 +11,8 @@ import Conversation from "../../Molecules/Conversations";
 import { fetchCurrentUser, fetchUserLocation, fetchNearbyBuildings } from "../../../api/auth";
 import Group from "../../Molecules/ActiveGroups";
 import GetLocation from "./GetLocation";
+import { useLocationGeoJSON } from "../../../hooks/useLocationGEOJSON";
+
 
 // ─── Distance options mapped to meters ───────────────────────────────────────
 const DISTANCE_OPTIONS = [
@@ -24,7 +26,7 @@ const DISTANCE_OPTIONS = [
 ];
 
 const HomeScreen = () => {
-  const [selectedRadius, setSelectedRadius] = useState(500); // default 500m
+  const [selectedRadius, setSelectedRadius] = useState(100); // default 100m
   const [visible, setVisible] = useState(false);
   // ── Current user ─────────────────────────────────────────────────────────
   const { data: userData } = useQuery({
@@ -32,6 +34,13 @@ const HomeScreen = () => {
     queryFn: fetchCurrentUser,
     staleTime: 5 * 60_000, // 5 min
   });
+  const {
+    data: geojsonData,
+    isLoading,
+    error,
+  } = useLocationGeoJSON("maharashtra");
+
+  console.log("geojsonData", geojsonData);
 
   // ── User location ─────────────────────────────────────────────────────────
   const { data: location } = useQuery({
@@ -51,13 +60,13 @@ const HomeScreen = () => {
     queryFn: () => fetchNearbyBuildings(selectedRadius),
     staleTime: 60_000, // 1 min
   });
-const truncateText = (text: string, limit: number = 7) => {
-  if (text.length <= limit) {
-    return text;
-  }
+  const truncateText = (text: string, limit: number = 7) => {
+    if (text.length <= limit) {
+      return text;
+    }
 
-  return text.substring(0, limit) + '...';
-};
+    return text.substring(0, limit) + '...';
+  };
   const buildings = buildingData?.buildings ?? [];
   // console.log("Building data:", buildingData);
   return (
@@ -114,7 +123,7 @@ const truncateText = (text: string, limit: number = 7) => {
             Nearby Buildings ({buildingData?.buildingCount ?? 0})
           </Text>
           <TouchableOpacity onPress={() => refetchBuildings()}>
-            <Text style={styles.viewAll}>Refresh</Text>
+            <Text style={styles.viewAll}>View All</Text>
           </TouchableOpacity>
         </View>
 
@@ -126,7 +135,7 @@ const truncateText = (text: string, limit: number = 7) => {
         )}
         {!buildingsLoading && buildings.map((building: any, i: number) => (
           // Replace with your Building card component
-          <Text key={i} style={{ color: "white" }}>{building.name ?? "Building"}</Text>
+          <Text key={i} style={{ color: "white" }}>{building.name ?? `Building ${i + 1}`}</Text>
         ))}
 
         {/* Active Conversations */}
