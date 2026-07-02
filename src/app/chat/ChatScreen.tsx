@@ -58,48 +58,88 @@ const ChatScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // useEffect(() => {
+  //   const load = async () => {
+  //     try {
+  //       // 1. Read session from AsyncStorage
+  //       const token = await AsyncStorage.getItem("authToken");
+  //       const userStr = await AsyncStorage.getItem("authUser");
+
+  //       if (!token || !userStr) {
+  //         setError("Not logged in");
+  //         return;
+  //       }
+
+  //       const user = JSON.parse(userStr);
+  //       const userId: string = user._id;
+  //       setCurrentUserId(userId);
+
+  //       // 2. Fetch conversations
+  //       const conversations = await fetchConversations(userId, token);
+
+  //       // 3. Shape into chat items — filter out self, use the other participant
+  //       const shaped: ChatItem[] = conversations.map((conv) => {
+  //         const other = conv.participants.find((p) => p._id !== userId);
+
+  //         return {
+  //           chatId: conv._id,           // conversation/room id
+  //           toUserId: other?._id ?? "", // the other person's userId
+  //           title: other?.name ?? "Unknown",
+  //           subtitle: conv.lastMessage?.message ?? "Say hello!",
+  //         };
+  //       });
+
+  //       setChats(shaped);
+  //     } catch (err) {
+  //       console.error(err);
+  //       setError("Failed to load chats");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   load();
+  // }, []);
   useEffect(() => {
-    const load = async () => {
-      try {
-        // 1. Read session from AsyncStorage
-        const token = await AsyncStorage.getItem("authToken");
-        const userStr = await AsyncStorage.getItem("authUser");
+  // Simulate logged-in user
+  setCurrentUserId("user123");
 
-        if (!token || !userStr) {
-          setError("Not logged in");
-          return;
-        }
+  const dummyChats: ChatItem[] = [
+    {
+      chatId: "1",
+      toUserId: "u101",
+      title: "Dhruv Kotian",
+      subtitle: "chal bhai niche hu!!!!",
+    },
+    {
+      chatId: "2",
+      toUserId: "u102",
+      title: "Samiksha Patil",
+      subtitle: "hello, hello hello",
+    },
+    {
+      chatId: "3",
+      toUserId: "u103",
+      title: "Building (Pratham, Nagesh..+6more)",
+      subtitle: "Meeting at 6 PM today!!!",
+    },
+    {
+      chatId: "4",
+      toUserId: "u104",
+      title: "Sri",
+      subtitle: "Confirm Hogaya, wo aayenge bole",
+    },
+    {
+      chatId: "5",
+      toUserId: "u105",
+      title: "Tester",
+      subtitle: "Test it",
+    },
+  ];
 
-        const user = JSON.parse(userStr);
-        const userId: string = user._id;
-        setCurrentUserId(userId);
-
-        // 2. Fetch conversations
-        const conversations = await fetchConversations(userId, token);
-
-        // 3. Shape into chat items — filter out self, use the other participant
-        const shaped: ChatItem[] = conversations.map((conv) => {
-          const other = conv.participants.find((p) => p._id !== userId);
-
-          return {
-            chatId: conv._id,           // conversation/room id
-            toUserId: other?._id ?? "", // the other person's userId
-            title: other?.name ?? "Unknown",
-            subtitle: conv.lastMessage?.message ?? "Say hello!",
-          };
-        });
-
-        setChats(shaped);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load chats");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-  }, []);
+  setChats(dummyChats);
+  setLoading(false);
+}, []);
 
   const openChat = (chatId: string, toUserId: string) => {
     if (!currentUserId) return;
@@ -152,7 +192,7 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   center: {
     paddingHorizontal: 4,
-    marginTop: 64,
+    marginTop: 24,
     alignItems: "center",
   },
   subtitle: {

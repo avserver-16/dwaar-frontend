@@ -12,6 +12,7 @@ import { fetchCurrentUser, fetchUserLocation, fetchNearbyBuildings } from "../..
 import Group from "../../Molecules/ActiveGroups";
 import GetLocation from "./GetLocation";
 import { useLocationGeoJSON } from "../../../hooks/useLocationGEOJSON";
+import JoinRoomModal from "../../Molecules/JoinModal";
 
 
 // ─── Distance options mapped to meters ───────────────────────────────────────
@@ -28,6 +29,8 @@ const DISTANCE_OPTIONS = [
 const HomeScreen = () => {
   const [selectedRadius, setSelectedRadius] = useState(100); // default 100m
   const [visible, setVisible] = useState(false);
+  const [isJoin, setIsJoin] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<number | null>(null);
   // ── Current user ─────────────────────────────────────────────────────────
   const { data: userData } = useQuery({
     queryKey: ["currentUser"],
@@ -48,7 +51,7 @@ const HomeScreen = () => {
     queryFn: fetchUserLocation,
     staleTime: 5 * 60_000,
   });
-
+  console.log("location", location);
   // ── Nearby buildings — re-fetches when radius changes ─────────────────────
   const {
     data: buildingData,
@@ -60,7 +63,7 @@ const HomeScreen = () => {
     queryFn: () => fetchNearbyBuildings(selectedRadius),
     staleTime: 60_000, // 1 min
   });
-  const truncateText = (text: string, limit: number = 7) => {
+  const truncateText = (text: string, limit: number = 15) => {
     if (text.length <= limit) {
       return text;
     }
@@ -118,26 +121,66 @@ const HomeScreen = () => {
         />
 
         {/* Buildings result */}
-        <View style={styles.sectionHeader}>
+        <View style={[styles.sectionHeader, { marginBottom: 32 }]}>
           <Text style={styles.locationText}>
             Nearby Buildings ({buildingData?.buildingCount ?? 0})
           </Text>
           <TouchableOpacity onPress={() => refetchBuildings()}>
             <Text style={styles.viewAll}>View All</Text>
           </TouchableOpacity>
+          <Text style={{ color: "#656565", position: "absolute", top: 40, fontSize: 12 }}>Select a region to join a room</Text>
         </View>
-
         {buildingsLoading && (
           <ActivityIndicator color="#9AB17A" style={{ marginVertical: 16 }} />
         )}
         {buildingsError && (
           <Text style={styles.errorText}>Failed to load buildings</Text>
         )}
-        {!buildingsLoading && buildings.map((building: any, i: number) => (
-          // Replace with your Building card component
-          <Text key={i} style={{ color: "white" }}>{building.name ?? `Building ${i + 1}`}</Text>
-        ))}
+        {!buildingsLoading &&
+          buildings.slice(0, 15).map((item: any, index: number) => {
+            const isSelected = selectedRegion === index;
 
+            return (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  // Toggle selection
+                  setSelectedRegion(isSelected ? null : index);
+                }}
+                style={{
+                  height: 40,
+                  width: 50,
+                  borderRadius: 12,
+                  marginBottom: 12,
+                  marginHorizontal: 12,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderWidth: 0.5,
+                  borderColor: "#9AB17A",
+                  backgroundColor: isSelected ? "#9AB17A" : "transparent",
+                }}
+              >
+                <Text
+                  style={{
+                    color: isSelected ? "#fff" : "#9AB17A",
+                    fontSize: 14,
+                    fontWeight: "600",
+                  }}
+                >
+                  {`B-${index + 1}`}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        <TouchableOpacity
+          onPress={() => setIsJoin(true)}
+          disabled={!selectedRegion}
+          style={{
+            height: 60, width: "100%", justifyContent: "center", alignItems: "center",
+            backgroundColor: selectedRegion ? "#9AB17A" : "#9ab17a51", borderRadius: 100, marginBottom: 24, marginTop: 12
+          }}>
+          <Text style={{ color: "#000", fontSize: 16, fontFamily: fonts.EsemiBold }}>{selectedRegion ? "Join this region" : "Select a region first"}</Text>
+        </TouchableOpacity>
         {/* Active Conversations */}
         <View style={[styles.sectionHeader, { marginTop: 24 }]}>
           <Text style={styles.locationText}>Active Conversations</Text>
@@ -163,10 +206,27 @@ const HomeScreen = () => {
           <Group name="Morning Yoga" />
           <Group name="Evening Walk" />
         </View>
-
-
-
       </ScrollView>
+      <JoinRoomModal
+        visible={isJoin}
+        username={userData?.name || ""}
+        categories={[
+          { label: "General", value: "general" },
+          { label: "Sports", value: "sports" },
+          { label: "Technology", value: "tech" },
+        ]}
+        rooms={[
+          { label: "React Native", value: "rn" },
+          { label: "MongoDB", value: "mongo" },
+          { label: "Node.js", value: "node" },
+          { label: "DSA", value: "dsa" },
+        ]}
+        onClose={() => setIsJoin(false)}
+        onJoin={(category: string, room: string) => {
+          console.log(category, room);
+          setIsJoin(false);
+        }}
+      />
     </GradientBackground>
   );
 };
@@ -191,6 +251,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 12,
     width: "100%",
+    marginBottom: 8,
   },
   locationText: {
     fontSize: 20,
@@ -217,7 +278,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    // backgroundColor: "rgba(0,0,0,0.5)",
     flexDirection: "row",
   },
   button: {

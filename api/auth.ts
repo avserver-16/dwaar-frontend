@@ -241,7 +241,7 @@ export const fetchUserLocation =
             "Failed to fetch location"
         );
       }
-
+console.log("Fetch location data:", data);
       return data.location;
     } catch (error) {
       console.log(
@@ -268,7 +268,9 @@ export const fetchNearbyBuildings = async (radius: number) => {
     body: JSON.stringify({ radius }),
   });
 
+  
   const data = await res.json();
+  console.log("Fetching nearby buildings with radius:", data);
   if (!res.ok) throw new Error(data.error || "Failed to fetch buildings");
   return data;
 };
