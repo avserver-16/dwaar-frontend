@@ -13,7 +13,7 @@ import Group from "../../Molecules/ActiveGroups";
 import GetLocation from "./GetLocation";
 import { useLocationGeoJSON } from "../../../hooks/useLocationGEOJSON";
 import JoinRoomModal from "../../Molecules/JoinModal";
-
+import { useNavigation } from "@react-navigation/native";
 
 // ─── Distance options mapped to meters ───────────────────────────────────────
 const DISTANCE_OPTIONS = [
@@ -71,6 +71,7 @@ const HomeScreen = () => {
     return text.substring(0, limit) + '...';
   };
   const buildings = buildingData?.buildings ?? [];
+  const navigation = useNavigation<any>();
   // console.log("Building data:", buildingData);
   return (
     <GradientBackground>
@@ -189,9 +190,9 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.row}>
-          <Conversation name="John Doe" />
-          <Conversation name="John Doe" />
-          <Conversation name="John Doe" />
+          <Conversation name="Dhruv" />
+          <Conversation name="Samiksha" />
+          <Conversation name="Sri" />
         </View>
 
         {/* Active Groups */}
@@ -202,9 +203,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.row}>
-          <Group name="Sunday Jog" />
-          <Group name="Morning Yoga" />
-          <Group name="Evening Walk" />
+          <Group name="Building Committee" />
         </View>
       </ScrollView>
       <JoinRoomModal
@@ -225,6 +224,7 @@ const HomeScreen = () => {
         onJoin={(category: string, room: string) => {
           console.log(category, room);
           setIsJoin(false);
+          navigation.navigate("ChatOnboarding");
         }}
       />
     </GradientBackground>

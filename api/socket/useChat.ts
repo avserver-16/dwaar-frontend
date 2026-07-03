@@ -19,6 +19,8 @@ export interface Message {
   thumbnail?: string;
   createdAt: string;
   isPrivate?: boolean;
+  senderName?: string;
+  color?: string;
 }
 
 // ─── API helpers (swap with your actual API client) ──────────────────────────

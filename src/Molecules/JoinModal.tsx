@@ -65,6 +65,8 @@ const JoinRoomModal = ({
             value={category}
             onChange={(item: Category) => setCategory(item.value)}
             iconColor="#000"
+            containerStyle={styles.dropdownContainer}
+            itemTextStyle={{color:"#9AB17A"}}
           />
 
           <Text style={styles.label}>Select Room</Text>
@@ -80,6 +82,9 @@ const JoinRoomModal = ({
             value={room}
             onChange={(item: Room) => setRoom(item.value)}
             iconColor="#000"
+            containerStyle={styles.dropdownContainer}
+            itemTextStyle={{color:"#9AB17A"}}
+            inputSearchStyle={{borderWidth:0}}
           />
 
           <View style={styles.buttonRow}>
@@ -150,7 +155,7 @@ const styles = StyleSheet.create({
   dropdown: {
     backgroundColor: "transparent",
     borderRadius: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 12,  
     height: 52,
     marginTop: 4,
     borderWidth: 1,
@@ -185,5 +190,12 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: "700",
     fontSize: 15,
+  },
+  dropdownContainer: {
+    backgroundColor: "#000",
+    borderWidth: 1,
+    borderColor: "#9AB17A",
+    borderRadius:24,
+    color:"#9AB17A"
   },
 });

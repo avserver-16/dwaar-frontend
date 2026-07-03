@@ -115,7 +115,7 @@ const ChatScreen = () => {
       chatId: "2",
       toUserId: "u102",
       title: "Samiksha Patil",
-      subtitle: "hello, hello hello",
+      subtitle: "Ha dhruv aur me just niklenge",
     },
     {
       chatId: "3",

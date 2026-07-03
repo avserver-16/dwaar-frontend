@@ -16,5 +16,6 @@ export type RootStackParamList = {
     chatId: string;
     currentUserId: string;
   };
+  ChatOnboarding: undefined;
 };
 

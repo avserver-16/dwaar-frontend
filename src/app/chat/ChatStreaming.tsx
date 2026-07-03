@@ -29,6 +29,7 @@ import { fonts } from "../../../styles/globalStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Message, usePrivateChat, useRoomChat, useTypingIndicator } from "../../../api/socket/useChat";
+import { getDummyChats } from "../../Molecules/ChatRetrieval";
 
 
 
@@ -244,6 +245,21 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
                 {item.type === "FILE" && (
                     <Text style={styles.fileText}>📄 {item.fileName || "File"}</Text>
                 )}
+                {item.type === "TEXT" && item.senderName && (
+                    <Text
+                        style={{
+                            // color: "white",
+                            fontSize: 12,
+                            position: "absolute",
+                            bottom: 12,
+                            left: 14,
+                            fontFamily: fonts.Eregular,
+                            color: item.color || "white",
+                        }}
+                    >
+                        {item.senderName}
+                    </Text>
+                )}
                 <Text style={styles.timeText}>
                     {new Date(item.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
@@ -255,7 +271,7 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
     };
 
     const navigation = useNavigation();
-
+    const retrievedChats = getDummyChats(chatId, currentUserId);
     return (
         <GradientBackground>
             <View style={styles.container}>
@@ -277,20 +293,10 @@ const ChatStreaming = ({ route }: { route: { params: ChatStreamingProps } }) => 
                 ) : (
                     <FlatList
                         ref={flatListRef}
-                        data={messages}
+                        data={retrievedChats}
                         keyExtractor={(item) => item.id}
                         renderItem={renderMessage}
-                        contentContainerStyle={styles.list}
-                        showsVerticalScrollIndicator={false}
-                        ListFooterComponent={
-                            remoteTyping ? (
-                                <View style={styles.typingContainer}>
-                                    <Text style={styles.typingText}>
-                                        typing{typingDots}
-                                    </Text>
-                                </View>
-                            ) : null
-                        }
+                        style={{ paddingBottom: 80 }}
                     />
                 )}
 
