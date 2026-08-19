@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-  connect: (token: string, userId: string) => void;
+  connect: (token: string) => void;
   disconnect: () => void;
 }
 
@@ -17,7 +17,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  const connect = (token: string, userId: string) => {
+  const connect = (token: string) => {
     const socketInstance = initializeSocket(token);
     setSocket(socketInstance);
   };
@@ -35,14 +35,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       if (socketInstance.connected) {
         setIsConnected(true);
-        registerUser(user._id);
+        registerUser();
       } else {
         setIsConnected(false);
       }
 
       const handleConnect = () => {
         setIsConnected(true);
-        registerUser(user._id);
+        registerUser();
       };
 
       const handleDisconnect = () => {

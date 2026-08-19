@@ -14,6 +14,9 @@ export const initializeSocket = (token: string): Socket => {
       token,
     },
     transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
   });
 
   return socket;
@@ -30,9 +33,9 @@ export const disconnectSocket = (): void => {
   }
 };
 
-export const registerUser = (userId: string): void => {
+export const registerUser = (): void => {
   if (socket) {
-    socket.emit('register_user', userId);
+    socket.emit('register_user');
   }
 };
 

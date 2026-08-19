@@ -3,7 +3,7 @@ import type { User, Location } from '../types';
 
 export const usersApi = {
   getCurrentUser: async (): Promise<User> => {
-    const response = await apiClient.get<User>('/api/users');
+    const response = await apiClient.get<User>('/api/users/me');
     return response.data;
   },
 
