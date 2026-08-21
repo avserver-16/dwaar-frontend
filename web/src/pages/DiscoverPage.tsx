@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNearby, useNearbyRooms } from '../hooks/useSpatial';
 import { useNearbyBuildings } from '../hooks/useUsers';
@@ -61,24 +61,32 @@ export const DiscoverPage: React.FC = () => {
     }
   };
 
-  const filterItems = (items: any[]) => {
-    if (!searchQuery) return items;
-    return items.filter(item =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  };
+const filterItems = (items: any) => {
+  const arr = Array.isArray(items) ? items : [];
+  if (!searchQuery) return arr;
+  return arr.filter(item =>
+    item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+};
 
-  const filteredCommunities = filterItems(nearbyData?.groups || []);
-  const filteredRooms = filterItems(nearbyRooms || []);
-  const filteredBuildings = filterItems(nearbyBuildings || []);
-
-  const allItems = [
-    ...filteredCommunities.map(item => ({ ...item, type: 'community' })),
-    ...filteredRooms.map(item => ({ ...item, type: 'room' })),
-    ...filteredBuildings.map(item => ({ ...item, type: 'building' })),
-  ];
-
+const filteredCommunities = useMemo(
+  () => filterItems(nearbyData?.groups),
+  [nearbyData, searchQuery]
+);
+const filteredRooms = useMemo(
+  () => filterItems(nearbyRooms),
+  [nearbyRooms, searchQuery]
+);
+const filteredBuildings = useMemo(
+  () => filterItems(nearbyBuildings),
+  [nearbyBuildings, searchQuery]
+);
+const allItems = useMemo(() => [
+  ...filteredCommunities.map(item => ({ ...item, type: 'community' })),
+  ...filteredRooms.map(item => ({ ...item, type: 'room' })),
+  ...filteredBuildings.map(item => ({ ...item, type: 'building' })),
+], [filteredCommunities, filteredRooms, filteredBuildings]);
   const getFilteredContent = () => {
     switch (activeTab) {
       case 'communities':
